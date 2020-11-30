@@ -29,14 +29,13 @@
     "DatabaseResources": {
       "type": "string",
       "allowedValues": [
-        "GP_Gen5_2",
         "GP_Gen5_4",
         "GP_Gen5_8",
         "GP_Gen5_16",
         "GP_Gen5_32",
         "GP_Gen5_64"
       ],
-      "defaultValue": "GP_Gen5_2",
+      "defaultValue": "GP_Gen5_4",
       "metadata": {
         "description": "The speed of the database (the number depects the number of vCPU's)."
       }
@@ -72,7 +71,7 @@
     },
     {
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2018-02-01",
       "name": "[variables('webAppPortalName')]",
       "location": "[parameters('location')]",
       "kind": "app,linux",
@@ -117,7 +116,7 @@
     },
     {
         "type": "Microsoft.Web/sites/config",
-        "apiVersion": "2018-11-01",
+        "apiVersion": "2018-02-01",
         "name": "[concat(parameters('webAppName'), '/web')]",
         "location": "[parameters('location')]",
         "dependsOn": [
@@ -191,7 +190,7 @@
     },
     {
         "type": "Microsoft.Web/sites/hostNameBindings",
-        "apiVersion": "2018-11-01",
+        "apiVersion": "2018-02-01",
         "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
         "location": "[parameters('location')]",
         "dependsOn": [
