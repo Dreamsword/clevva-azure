@@ -19,12 +19,12 @@
       "minLength": 4
     },
     "DatabasePassword": {
-      "type": "string",
-      "defaultValue": "clevvadatabasepasswordproduction",
+      "type": "securestring",
+      "defaultValue": "ClevvaDatabasePasswordProduction!",
       "metadata": {
         "description": "Password of the database user."
       },
-      "minLength": 6
+      "minLength": 8
     },
     "DatabaseResources": {
       "type": "string",
@@ -68,34 +68,77 @@
       },
       "kind": "linux",
       "properties": {
-        "reserved": true
+        "name": "[variables('appServicePlanName')]",
+        "workerSizeId": "1",
+        "reserved": true,
+        "numberOfWorkers": "1"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-02-01",
+      "name": "[variables('webAppPortalName')]",
+      "location": "[variables('locationName')]",
+      "kind": "app,linux",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
+      ],
+      "properties": {
+        "enabled": true,
+        "httpsOnly": true,
+        "reserved": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[variables('linuxFxVersion')]",
+          "appSettings": [
+            {
+                "name": "DB_HOST",
+                "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
+            },
+            {
+                "name": "DB_USER",
+                "value": "[parameters('DatabaseUser')]"
+            },
+            {
+                "name": "DB_PASS",
+                "value": "[parameters('DatabasePassword')]"
+            },
+            {
+                "name": "DB_NAME",
+                "value": "clevva"
+            },
+            {
+                "name": "IS_HTTPS",
+                "value": "true"
+            },
+            {
+                "name": "MYSQL_ATTR_SSL_CA",
+                "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
+            }
+          ]
+        }
       }
     },
     {
         "type": "Microsoft.DBforMySQL/servers",
         "apiVersion": "2017-12-01",
         "name": "[variables('databasePortalName')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
-        ],
         "location": "[variables('locationName')]",
         "sku": {
             "name": "[parameters('DatabaseResources')]",
             "tier": "GeneralPurpose",
-            "family": "Gen5",
-            "capacity": 2
+            "size": "102400",
+            "family": "Gen5"
         },
         "properties": {
             "createMode": "Default",
             "version": "5.7",
             "administratorLogin": "[parameters('DatabaseUser')]",
             "administratorLoginPassword": "[parameters('DatabasePassword')]",
-            "vCores": 8,
             "storageProfile": {
                 "storageMB": 102400,
                 "backupRetentionDays": 7,
-                "geoRedundantBackup": "Disabled",
-                "storageAutogrow": "Enabled"
+                "geoRedundantBackup": "Disabled"
             },
             "sslEnforcement": "Enabled",
             "minimalTlsVersion": "TLSEnforcementDisabled",
@@ -253,51 +296,6 @@
             "emailAccountAdmins": false,
             "retentionDays": 0
         }
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2018-02-01",
-      "name": "[variables('webAppPortalName')]",
-      "location": "[variables('locationName')]",
-      "kind": "app,linux",
-      "dependsOn": [
-        "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-      ],
-      "properties": {
-        "enabled": true,
-        "httpsOnly": true,
-        "reserved": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "siteConfig": {
-          "linuxFxVersion": "[variables('linuxFxVersion')]",
-          "appSettings": [
-            {
-                "name": "DB_HOST",
-                "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
-            },
-            {
-                "name": "DB_USER",
-                "value": "[parameters('DatabaseUser')]"
-            },
-            {
-                "name": "DB_PASS",
-                "value": "[parameters('DatabasePassword')]"
-            },
-            {
-                "name": "DB_NAME",
-                "value": "clevva"
-            },
-            {
-                "name": "IS_HTTPS",
-                "value": "true"
-            },
-            {
-                "name": "MYSQL_ATTR_SSL_CA",
-                "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
-            }
-          ]
-        }
-      }
     },
     {
         "type": "Microsoft.Web/sites/config",
