@@ -44,7 +44,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Name of the database user."
+        "description": "Name of your company."
       },
       "minLength": 3
     }
@@ -398,7 +398,7 @@
             "properties": {}
           },
           "template": {
-            "id": "[parameters('webAppName')]",
+            "id": "[parameters('Organization')]",
             "parameters": {}
           }
         }
