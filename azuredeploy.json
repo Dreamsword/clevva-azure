@@ -86,13 +86,16 @@
             "capacity": 2
         },
         "properties": {
+            "createMode": "Default",
+            "version": "5.7",
+            "administratorLogin": "[parameters('DatabaseUser')]",
+            "administratorLoginPassword": "[parameters('DatabasePassword')]",
             "storageProfile": {
                 "storageMB": 102400,
                 "backupRetentionDays": 7,
                 "geoRedundantBackup": "Disabled",
                 "storageAutogrow": "Enabled"
             },
-            "version": "5.7",
             "sslEnforcement": "Enabled",
             "minimalTlsVersion": "TLSEnforcementDisabled",
             "infrastructureEncryption": "Disabled",
@@ -298,10 +301,10 @@
     {
         "type": "Microsoft.Web/sites/config",
         "apiVersion": "2018-02-01",
-        "name": "[concat(parameters('webAppName'), '/web')]",
+        "name": "[concat(variables('webAppPortalName'), '/web')]",
         "location": "[variables('locationName')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
         ],
         "properties": {
             "numberOfWorkers": 1,
@@ -384,7 +387,7 @@
           "name": "ClevvaAzure"
         },
         "project": {
-          "name": "[parameters('Organization')]"
+          "name": "Clevva App"
         },
         "bootstrapConfiguration": {
           "repository": {
