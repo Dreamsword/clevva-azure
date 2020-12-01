@@ -257,7 +257,7 @@
       "location": "[variables('locationName')]",
       "kind": "app,linux",
       "dependsOn": [
-        "[resourceId('Microsoft.DBforMySQL/servers', variables('appServicePlanName'))]"
+        "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
       ],
       "properties": {
         "enabled": true,
