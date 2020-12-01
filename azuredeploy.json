@@ -384,7 +384,7 @@
           "name": "ClevvaAzure"
         },
         "project": {
-          "name": "Clevva App"
+          "name": "[parameters('Organization')]"
         },
         "bootstrapConfiguration": {
           "repository": {
@@ -398,7 +398,7 @@
             "properties": {}
           },
           "template": {
-            "id": "[parameters('Organization')]",
+            "id": "clevva.clevva-compiled",
             "parameters": {}
           }
         }
