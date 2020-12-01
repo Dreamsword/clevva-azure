@@ -90,6 +90,7 @@
             "version": "5.7",
             "administratorLogin": "[parameters('DatabaseUser')]",
             "administratorLoginPassword": "[parameters('DatabasePassword')]",
+            "vCores": 8,
             "storageProfile": {
                 "storageMB": 102400,
                 "backupRetentionDays": 7,
@@ -401,7 +402,7 @@
             "properties": {}
           },
           "template": {
-            "id": "clevva.clevva-compiled",
+            "id": "6",
             "parameters": {}
           }
         }
