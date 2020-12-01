@@ -377,7 +377,7 @@
     {
       "type": "Microsoft.DevOps/pipelines",
       "apiVersion": "2019-07-01-preview",
-      "name": "Clevva CI/CD",
+      "name": "Clevva-CICD",
       "location": "[variables('locationName')]",
       "properties": {
         "organization": {
