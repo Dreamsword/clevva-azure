@@ -120,6 +120,85 @@
       }
     },
     {
+        "type": "Microsoft.Web/sites/config",
+        "apiVersion": "2018-02-01",
+        "name": "[concat(variables('webAppPortalName'), '/web')]",
+        "location": "[variables('locationName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
+        ],
+        "properties": {
+            "numberOfWorkers": 1,
+            "defaultDocuments": [
+                "index.php"
+            ],
+            "netFrameworkVersion": "v4.0",
+            "linuxFxVersion": "[variables('linuxFxVersion')]",
+            "requestTracingEnabled": false,
+            "remoteDebuggingEnabled": false,
+            "remoteDebuggingVersion": "VS2019",
+            "httpLoggingEnabled": false,
+            "logsDirectorySizeLimit": 35,
+            "detailedErrorLoggingEnabled": false,
+            "publishingUsername": "[parameters('webAppName')]",
+            "azureStorageAccounts": {},
+            "scmType": "VSTSRM",
+            "use32BitWorkerProcess": true,
+            "webSocketsEnabled": false,
+            "alwaysOn": true,
+            "managedPipelineMode": "Integrated",
+            "virtualApplications": [
+                {
+                    "virtualPath": "/",
+                    "physicalPath": "site\\wwwroot",
+                    "preloadEnabled": true
+                }
+            ],
+            "loadBalancing": "LeastRequests",
+            "experiments": {
+                "rampUpRules": []
+            },
+            "autoHealEnabled": false,
+            "localMySqlEnabled": false,
+            "ipSecurityRestrictions": [
+                {
+                    "ipAddress": "Any",
+                    "action": "Allow",
+                    "priority": 1,
+                    "name": "Allow all",
+                    "description": "Allow all access"
+                }
+            ],
+            "scmIpSecurityRestrictions": [
+                {
+                    "ipAddress": "Any",
+                    "action": "Allow",
+                    "priority": 1,
+                    "name": "Allow all",
+                    "description": "Allow all access"
+                }
+            ],
+            "scmIpSecurityRestrictionsUseMain": false,
+            "http20Enabled": false,
+            "minTlsVersion": "1.2",
+            "ftpsState": "Disabled",
+            "reservedInstanceCount": 0
+        }
+    },
+    {
+        "type": "Microsoft.Web/sites/hostNameBindings",
+        "apiVersion": "2018-02-01",
+        "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
+        "location": "[variables('locationName')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+        ],
+        "properties": {
+            "siteName": "[parameters('webAppName')]",
+            "hostNameType": "Verified"
+        }
+    },
+    {
         "type": "Microsoft.DBforMySQL/servers",
         "apiVersion": "2017-12-01",
         "name": "[variables('databasePortalName')]",
@@ -138,7 +217,8 @@
             "storageProfile": {
                 "storageMB": 102400,
                 "backupRetentionDays": 7,
-                "geoRedundantBackup": "Disabled"
+                "geoRedundantBackup": "Disabled",
+                "storageAutogrow": "Enabled"
             },
             "sslEnforcement": "Enabled",
             "minimalTlsVersion": "TLSEnforcementDisabled",
@@ -221,30 +301,6 @@
     {
         "type": "Microsoft.DBforMySQL/servers/databases",
         "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/information_schema')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "charset": "utf8",
-            "collation": "utf8_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/databases",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/mysql')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "charset": "utf8",
-            "collation": "utf8_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/databases",
-        "apiVersion": "2017-12-01",
         "name": "[concat(variables('databasePortalName'), '/performance_schema')]",
         "dependsOn": [
             "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
@@ -298,85 +354,6 @@
         }
     },
     {
-        "type": "Microsoft.Web/sites/config",
-        "apiVersion": "2018-02-01",
-        "name": "[concat(variables('webAppPortalName'), '/web')]",
-        "location": "[variables('locationName')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
-        ],
-        "properties": {
-            "numberOfWorkers": 1,
-            "defaultDocuments": [
-                "index.php"
-            ],
-            "netFrameworkVersion": "v4.0",
-            "linuxFxVersion": "[variables('linuxFxVersion')]",
-            "requestTracingEnabled": false,
-            "remoteDebuggingEnabled": false,
-            "remoteDebuggingVersion": "VS2019",
-            "httpLoggingEnabled": false,
-            "logsDirectorySizeLimit": 35,
-            "detailedErrorLoggingEnabled": false,
-            "publishingUsername": "[parameters('webAppName')]",
-            "azureStorageAccounts": {},
-            "scmType": "VSTSRM",
-            "use32BitWorkerProcess": true,
-            "webSocketsEnabled": false,
-            "alwaysOn": true,
-            "managedPipelineMode": "Integrated",
-            "virtualApplications": [
-                {
-                    "virtualPath": "/",
-                    "physicalPath": "site\\wwwroot",
-                    "preloadEnabled": true
-                }
-            ],
-            "loadBalancing": "LeastRequests",
-            "experiments": {
-                "rampUpRules": []
-            },
-            "autoHealEnabled": false,
-            "localMySqlEnabled": false,
-            "ipSecurityRestrictions": [
-                {
-                    "ipAddress": "Any",
-                    "action": "Allow",
-                    "priority": 1,
-                    "name": "Allow all",
-                    "description": "Allow all access"
-                }
-            ],
-            "scmIpSecurityRestrictions": [
-                {
-                    "ipAddress": "Any",
-                    "action": "Allow",
-                    "priority": 1,
-                    "name": "Allow all",
-                    "description": "Allow all access"
-                }
-            ],
-            "scmIpSecurityRestrictionsUseMain": false,
-            "http20Enabled": false,
-            "minTlsVersion": "1.2",
-            "ftpsState": "Disabled",
-            "reservedInstanceCount": 0
-        }
-    },
-    {
-        "type": "Microsoft.Web/sites/hostNameBindings",
-        "apiVersion": "2018-02-01",
-        "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
-        "location": "[variables('locationName')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
-        "properties": {
-            "siteName": "[parameters('webAppName')]",
-            "hostNameType": "Verified"
-        }
-    },
-    {
       "type": "Microsoft.DevOps/pipelines",
       "apiVersion": "2019-07-01-preview",
       "name": "Clevva-CICD",
@@ -398,10 +375,6 @@
               "parameters": {}
             },
             "properties": {}
-          },
-          "template": {
-            "id": "6",
-            "parameters": {}
           }
         }
       }
