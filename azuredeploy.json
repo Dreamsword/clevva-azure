@@ -375,6 +375,10 @@
               "parameters": {}
             },
             "properties": {}
+          },
+          "template": {
+          "id": "clevva.clevva-compiled",
+          "parameters": {}
           }
         }
       }
