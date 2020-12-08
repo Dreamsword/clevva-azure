@@ -363,7 +363,7 @@
       "tags": {},
       "properties": {
         "azPowerShellVersion": "3.0",
-        "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
+        "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1"
       }
     }
   ]
