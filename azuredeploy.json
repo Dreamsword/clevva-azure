@@ -40,7 +40,7 @@
         "description": "The speed of the database (the number depects the number of vCPU's)."
       }
     },
-    "Organization": {
+    "CompanyName": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
