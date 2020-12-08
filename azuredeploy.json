@@ -354,33 +354,16 @@
         }
     },
     {
-      "type": "Microsoft.DevOps/pipelines",
-      "apiVersion": "2019-07-01-preview",
-      "name": "Clevva-CICD",
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "Connect to Clevva DevOps",
+      "identity": {},
       "location": "[variables('locationName')]",
+      "kind": "AzurePowerShell",
+      "tags": {},
       "properties": {
-        "organization": {
-          "name": "ClevvaAzure"
-        },
-        "project": {
-          "name": "Clevva App"
-        },
-        "bootstrapConfiguration": {
-          "repository": {
-            "repositoryType": "vstsGit",
-            "id": "clevva-compiled",
-            "defaultBranch": "master",
-            "authorization": {
-              "authorizationType": "personalAccessToken",
-              "parameters": {}
-            },
-            "properties": {}
-          },
-          "template": {
-          "id": "6",
-          "parameters": {}
-          }
-        }
+        "azPowerShellVersion": "3.0",
+        "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
       }
     }
   ]
