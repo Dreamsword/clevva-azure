@@ -353,22 +353,19 @@
             "retentionDays": 0
         }
     },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2019-10-01-preview",
-      "name": "Connect to Clevva DevOps",
-      "identity": {
-        "type": "userAssigned"
-      },
-      "location": "[variables('locationName')]",
-      "kind": "AzurePowerShell",
-      "tags": {},
-      "properties": {
-        "azPowerShellVersion": "3.0",
-        "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
-        "cleanupPreference": "OnSuccess",
-        "retentionInterval": "P1D"
-      }
-    }
+    // {
+    //   "type": "Microsoft.Resources/deploymentScripts",
+    //   "apiVersion": "2019-10-01-preview",
+    //   "name": "Connect to Clevva DevOps",
+    //   "identity": {},
+    //   "location": "[variables('locationName')]",
+    //   "kind": "AzurePowerShell",
+    //   "properties": {
+    //     "azPowerShellVersion": "3.0",
+    //     "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
+    //     "cleanupPreference": "OnSuccess",
+    //     "retentionInterval": "P1D"
+    //   }
+    // }
   ]
 }
