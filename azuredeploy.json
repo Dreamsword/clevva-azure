@@ -20,7 +20,6 @@
     },
     "DatabasePassword": {
       "type": "securestring",
-      "defaultValue": "ClevvaDatabasePasswordProduction!",
       "metadata": {
         "description": "Password of the database user."
       },
@@ -59,7 +58,7 @@
   "resources": [
     {
       "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2018-02-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('appServicePlanName')]",
       "location": "[variables('locationName')]",
       "sku": {
@@ -76,7 +75,7 @@
     },
     {
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2018-02-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('webAppPortalName')]",
       "location": "[variables('locationName')]",
       "kind": "app,linux",
@@ -141,7 +140,6 @@
             "logsDirectorySizeLimit": 35,
             "detailedErrorLoggingEnabled": false,
             "publishingUsername": "[parameters('webAppName')]",
-            "azureStorageAccounts": {},
             "scmType": "VSTSRM",
             "use32BitWorkerProcess": true,
             "webSocketsEnabled": false,
@@ -155,9 +153,6 @@
                 }
             ],
             "loadBalancing": "LeastRequests",
-            "experiments": {
-                "rampUpRules": []
-            },
             "autoHealEnabled": false,
             "localMySqlEnabled": false,
             "ipSecurityRestrictions": [
@@ -187,7 +182,7 @@
     },
     {
         "type": "Microsoft.Web/sites/hostNameBindings",
-        "apiVersion": "2018-02-01",
+        "apiVersion": "2020-06-01",
         "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
         "location": "[variables('locationName')]",
         "dependsOn": [
