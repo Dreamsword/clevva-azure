@@ -9,12 +9,12 @@
             "value": "clevvapro"
         },
         "DatabasePassword": {
-            "value": "ClevvaDatabasePasswordProduction!"
+            "value": ""
         },
         "DatabaseResources": {
             "value": "GP_Gen5_4"
         },
-        "Organization": {
+        "CompanyName": {
             "value": ""
         }
     }

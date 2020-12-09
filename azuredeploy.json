@@ -38,14 +38,6 @@
       "metadata": {
         "description": "The speed of the database (the number depects the number of vCPU's)."
       }
-    },
-    "CompanyName": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Name of your company."
-      },
-      "minLength": 3
     }
   },
   "variables": {
@@ -80,7 +72,7 @@
       "location": "[variables('locationName')]",
       "kind": "app,linux",
       "dependsOn": [
-        "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
       ],
       "properties": {
         "enabled": true,
@@ -116,7 +108,23 @@
             }
           ]
         }
-      }
+      },
+      "resources": [
+        {
+          "type": "sourcecontrols",
+          "apiVersion": "2020-06-01",
+          "name": "web",
+          "location": "[variables('locationName')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
+          ],
+          "properties": {
+            "repoUrl": "https://$CLEVVA_COMPILED_USER:$CLEVVA_COMPILED_PASS@bitbucket.org/clevva/clevva-compiled.git",
+            "branch": "master",
+            "isManualIntegration": true
+          }
+       }
+      ]
     },
     {
         "type": "Microsoft.Web/sites/config",
@@ -347,20 +355,6 @@
             "emailAccountAdmins": false,
             "retentionDays": 0
         }
-    },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2019-10-01-preview",
-      "name": "Connect to Clevva DevOps",
-      "identity": {},
-      "location": "[variables('locationName')]",
-      "kind": "AzurePowerShell",
-      "properties": {
-        "azPowerShellVersion": "3.0",
-        "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
-        "cleanupPreference": "OnSuccess",
-        "retentionInterval": "P1D"
-      }
     }
   ]
 }
