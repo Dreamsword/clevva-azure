@@ -107,24 +107,28 @@
             }
           ]
         }
-      },
-      "resources": [
-        {
-          "type": "sourcecontrols",
-          "apiVersion": "2020-06-01",
-          "name": "ClevvaSource",
-          "location": "[variables('locationName')]",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/extensions",
+      "name": "[concat(parameters('webAppName'), '/script')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[variables('locationName')]",
+      "dependsOn": [
+          "[resourceId('Microsoft.Web/sites/', parameters('webAppName'))]"
+      ],
+      "properties": {
+          "publisher": "Clevva",
+          "type": "CustomScriptExtension",
+          "typeHandlerVersion": "1.7",
+          "autoUpgradeMinorVersion":true,
+          "settings": {
+              "fileUris": [
+              "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1"
           ],
-          "properties": {
-            "repoUrl": "https://github.com/Dreamsword/clevva-copiled",
-            "branch": "master",
-            "isManualIntegration": true,
-            "isMercurial": false
-          }
-       }
-      ]
+          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File devops.ps1"
+        }
+      }
     },
     {
         "type": "Microsoft.Web/sites/config",
