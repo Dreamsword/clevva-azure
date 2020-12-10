@@ -41,7 +41,6 @@
     }
   },
   "variables": {
-    "webAppPortalName": "[concat(parameters('webAppName'))]",
     "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
     "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
     "locationName": "[resourceGroup().location]",
@@ -68,7 +67,7 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2020-06-01",
-      "name": "[variables('webAppPortalName')]",
+      "name": "[parameters('webAppName')]",
       "location": "[variables('locationName')]",
       "kind": "app,linux",
       "dependsOn": [
@@ -108,31 +107,31 @@
             }
           ]
         }
-      },
-      "resources": [
-        {
-          "type": "sourcecontrols",
+      }
+    },
+    {
+          "type": "Microsoft.Web/sites/sourcecontrols",
           "apiVersion": "2020-06-01",
-          "name": "Clevva Source",
+          "kind": "Bitbucket",
+          "name": "[concat(parameters('webAppName'), '/clevvasource')]",
           "location": "[variables('locationName')]",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
+            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
           ],
           "properties": {
-            "repoUrl": "https://hein_reyneke:YT_xk39b!@bitbucket.org/clevva/clevva-compiled.git",
+            "repoUrl": "https://bitbucket.org/clevva/clevva-compiled.git",
             "branch": "master",
-            "isManualIntegration": true
+            "isManualIntegration": true,
+            "isMercurial": false
           }
-       }
-      ]
     },
     {
         "type": "Microsoft.Web/sites/config",
         "apiVersion": "2018-02-01",
-        "name": "[concat(variables('webAppPortalName'), '/web')]",
+        "name": "[concat(parameters('webAppName'), '/web')]",
         "location": "[variables('locationName')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('webAppPortalName'))]"
+            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
         ],
         "properties": {
             "numberOfWorkers": 1,
@@ -199,161 +198,6 @@
         "properties": {
             "siteName": "[parameters('webAppName')]",
             "hostNameType": "Verified"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers",
-        "apiVersion": "2017-12-01",
-        "name": "[variables('databasePortalName')]",
-        "location": "[variables('locationName')]",
-        "sku": {
-            "name": "[parameters('DatabaseResources')]",
-            "tier": "GeneralPurpose",
-            "size": "102400",
-            "family": "Gen5"
-        },
-        "properties": {
-            "createMode": "Default",
-            "version": "5.7",
-            "administratorLogin": "[parameters('DatabaseUser')]",
-            "administratorLoginPassword": "[parameters('DatabasePassword')]",
-            "storageProfile": {
-                "storageMB": 102400,
-                "backupRetentionDays": 7,
-                "geoRedundantBackup": "Disabled",
-                "storageAutogrow": "Enabled"
-            },
-            "sslEnforcement": "Enabled",
-            "minimalTlsVersion": "TLSEnforcementDisabled",
-            "infrastructureEncryption": "Disabled",
-            "publicNetworkAccess": "Enabled"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/configurations",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/character_set_server')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "value": "UTF8MB4",
-            "source": "user-override"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/configurations",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/collation_server')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "value": "UTF8MB4_BIN",
-            "source": "user-override"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/configurations",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/event_scheduler')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "value": "ON",
-            "source": "user-override"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/configurations",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/query_store_capture_mode')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "value": "ALL",
-            "source": "user-override"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/configurations",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/query_store_wait_sampling_capture_mode')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "value": "ALL",
-            "source": "user-override"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/databases",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/clevva')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "charset": "utf8mb4",
-            "collation": "utf8mb4_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/databases",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/performance_schema')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "charset": "utf8",
-            "collation": "utf8_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/databases",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/sys')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "charset": "utf8",
-            "collation": "utf8_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/firewallRules",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/AllowAllWindowsAzureIps')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "startIpAddress": "0.0.0.0",
-            "endIpAddress": "0.0.0.0"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/servers/securityAlertPolicies",
-        "apiVersion": "2017-12-01",
-        "name": "[concat(variables('databasePortalName'), '/Default')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
-        ],
-        "properties": {
-            "state": "Enabled",
-            "disabledAlerts": [
-                ""
-            ],
-            "emailAddresses": [
-                "devops@clevva.com"
-            ],
-            "emailAccountAdmins": false,
-            "retentionDays": 0
         }
     }
   ]
