@@ -112,14 +112,13 @@
         {
           "type": "sourcecontrols",
           "apiVersion": "2020-06-01",
-          "kind": "Bitbucket",
           "name": "ClevvaSource",
           "location": "[variables('locationName')]",
           "dependsOn": [
             "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
           ],
           "properties": {
-            "repoUrl": "https://bitbucket.org/clevva/clevva-compiled.git",
+            "repoUrl": "https://github.com/Dreamsword/clevva-copiled",
             "branch": "master",
             "isManualIntegration": true,
             "isMercurial": false
