@@ -42,15 +42,16 @@
   },
   "variables": {
     "identityName": "ClevvaUser",
-    "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
+    "readerRole": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
     "roleDefinitionName": "[guid(variables('identityName'), variables('roleDefinitionId'))]",
     "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-    "cliRecourceName": "ClientAppRegistration",
+    "cliResourceName": "ClientAppRegistration",
     "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
     "locationName": "[resourceGroup().location]",
     "linuxFxVersion": "php|7.4",
     "aadAppUri": "[concat('https://', parameters('webAppName'), 'azurewebsites.net')]",
-    "aadAppRedirectUri": "[concat('https://', parameters('webAppName'), 'azurewebsites.net/signin-oidc')]",
+    "aadAppRedirectUri": "[concat('https://', parameters('webAppName'), '.azurewebsites.net/signin-oidc')]",
     "cliArgs": "[concat(parameters('webAppName'), ' ', variables('aadAppUri'), ' ', variables('aadAppRedirectUri'))]"
   },
   "resources": [
@@ -120,25 +121,44 @@
         "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
         "name": "[variables('identityName')]",
         "apiVersion": "2018-11-30",
-        "location": "[variables('locationName')]"
+        "location": "[variables('locationName')]",
+        "resources": [
+          {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities/providers/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[resourceId(variables('identityName'), '/Microsoft.Authorization/', variables('roleDefinitionName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('roleDefinitionId')]",
+                "principalId": "[reference(variables('identityName')).principalId]",
+                "principalType": "ServicePrincipal"
+            }
+          }
+        ]
     },
     {
         "type": "Microsoft.Authorization/roleAssignments",
+        "name": "[guid(variables('identityName'))]",
         "apiVersion": "2020-04-01-preview",
-        "name": "[variables('roleDefinitionName')]",
         "dependsOn": [
-            "[variables('identityName')]"
+            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
         ],
         "properties": {
-            "roleDefinitionId": "[variables('roleDefinitionId')]",
-            "principalId": "[reference(variables('identityName')).principalId]"
+            "roleDefinitionId": "[variables('readerRole')]",
+            "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName')),'2018-11-30').principalId]",
+            "scope": "[resourceGroup().id]"
         }
     },
     {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2019-10-01-preview",
-      "name": "[variables('cliRecourceName')]",
+      "name": "[variables('cliResourceName')]",
       "location": "[variables('locationName')]",
+      "dependsOn": [
+            "[variables('roleDefinitionName')]"
+       ],
       "kind": "AzureCLI",
       "identity": {
         "type": "UserAssigned",
@@ -165,7 +185,8 @@
         "name": "[concat(parameters('webAppName'), '/web')]",
         "location": "[variables('locationName')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+            "[resourceId('Microsoft.Resources/deploymentScripts', variables('cliResourceName'))]"
         ],
         "properties": {
             "numberOfWorkers": 1,
@@ -219,7 +240,7 @@
             "minTlsVersion": "1.2",
             "ftpsState": "Disabled",
             "reservedInstanceCount": 0,
-            "applicationId": "[reference(variables('cliRecourceName')).outputs.appId]"
+            "applicationId": "[reference(variables('cliResourceName')).outputs.appId]"
         }
     },
     {
@@ -234,30 +255,6 @@
             "siteName": "[parameters('webAppName')]",
             "hostNameType": "Verified"
         }
-    },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2019-10-01-preview",
-      "name": "PowerShellScript",
-      "location": "[variables('locationName')]",
-      "kind": "AzurePowerShell",
-      "dependsOn": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-      ],
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {
-          }
-        }
-      },
-      "properties": {
-          "azPowerShellVersion": "3.0",
-          "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
-          "timeout": "PT2M",
-          "cleanupPreference": "OnSuccess",
-          "retentionInterval": "P1D"
-      }
     }
   ]
 }
