@@ -41,10 +41,17 @@
     }
   },
   "variables": {
+    "identityName": "ClevvaUser",
+    "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "roleDefinitionName": "[guid(variables('identityName'), variables('roleDefinitionId'))]",
     "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+    "cliRecourceName": "ClientAppRegistration",
     "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
     "locationName": "[resourceGroup().location]",
-    "linuxFxVersion": "php|7.4"
+    "linuxFxVersion": "php|7.4",
+    "aadAppUri": "[concat('https://', parameters('webAppName'), 'azurewebsites.net')]",
+    "aadAppRedirectUri": "[concat('https://', parameters('webAppName'), 'azurewebsites.net/signin-oidc')]",
+    "cliArgs": "[concat(parameters('webAppName'), ' ', variables('aadAppUri'), ' ', variables('aadAppRedirectUri'))]"
   },
   "resources": [
     {
@@ -110,24 +117,46 @@
       }
     },
     {
-      "type": "Microsoft.Web/sites/extensions",
-      "name": "[concat(parameters('webAppName'), '/script')]",
-      "apiVersion": "2015-05-01-preview",
-      "location": "[variables('locationName')]",
-      "dependsOn": [
-          "[resourceId('Microsoft.Web/sites/', parameters('webAppName'))]"
-      ],
-      "properties": {
-          "publisher": "Clevva",
-          "type": "CustomScriptExtension",
-          "typeHandlerVersion": "1.7",
-          "autoUpgradeMinorVersion":true,
-          "settings": {
-              "fileUris": [
-              "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1"
-          ],
-          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File devops.ps1"
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "name": "[variables('identityName')]",
+        "apiVersion": "2018-11-30",
+        "location": "[variables('locationName')]"
+    },
+    {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2020-04-01-preview",
+        "name": "[variables('roleDefinitionName')]",
+        "dependsOn": [
+            "[variables('identityName')]"
+        ],
+        "properties": {
+            "roleDefinitionId": "[variables('roleDefinitionId')]",
+            "principalId": "[reference(variables('identityName')).principalId]"
         }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "[variables('cliRecourceName')]",
+      "location": "[variables('locationName')]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {
+          }
+        }
+      },
+      "properties": {
+        "azCliVersion": "2.0.80",
+        "timeout": "PT2M",
+        "arguments": "[variables('cliArgs')]",
+        "scriptContent": "
+        appInfo=$(az ad app create --display-name $1 --identifier-uris \"$2\" --reply-urls \"$3\")
+        echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH
+        ",
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "P1D"
       }
     },
     {
@@ -189,7 +218,8 @@
             "http20Enabled": false,
             "minTlsVersion": "1.2",
             "ftpsState": "Disabled",
-            "reservedInstanceCount": 0
+            "reservedInstanceCount": 0,
+            "applicationId": "[reference(variables('cliRecourceName')).outputs.appId]"
         }
     },
     {
@@ -204,6 +234,30 @@
             "siteName": "[parameters('webAppName')]",
             "hostNameType": "Verified"
         }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "PowerShellScript",
+      "location": "[variables('locationName')]",
+      "kind": "AzurePowerShell",
+      "dependsOn": [
+          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+      ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {
+          }
+        }
+      },
+      "properties": {
+          "azPowerShellVersion": "3.0",
+          "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/devops.ps1",
+          "timeout": "PT2M",
+          "cleanupPreference": "OnSuccess",
+          "retentionInterval": "P1D"
+      }
     }
   ]
 }
