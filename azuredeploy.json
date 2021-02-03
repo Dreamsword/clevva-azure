@@ -1,260 +1,204 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "webAppName": {
-      "type": "string",
-      "defaultValue": "Clevva-Web-App",
-      "metadata": {
-        "description": "Base name of the resource such as Clevva-Web-App."
-      },
-      "minLength": 2
-    },
-    "DatabaseUser": {
-      "type": "string",
-      "defaultValue": "clevvapro",
-      "metadata": {
-        "description": "Name of the database user."
-      },
-      "minLength": 4
-    },
-    "DatabasePassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Password of the database user."
-      },
-      "minLength": 8
-    },
-    "DatabaseResources": {
-      "type": "string",
-      "allowedValues": [
-        "GP_Gen5_4",
-        "GP_Gen5_8",
-        "GP_Gen5_16",
-        "GP_Gen5_32",
-        "GP_Gen5_64"
-      ],
-      "defaultValue": "GP_Gen5_4",
-      "metadata": {
-        "description": "The speed of the database (the number depects the number of vCPU's)."
-      }
-    }
-  },
-  "variables": {
-    "identityName": "ClevvaUser",
-    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
-    "readerRole": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-    "roleDefinitionName": "[guid(variables('identityName'), variables('roleDefinitionId'))]",
-    "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-    "cliResourceName": "ClientAppRegistration",
-    "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
-    "locationName": "[resourceGroup().location]",
-    "linuxFxVersion": "php|7.4",
-    "aadAppUri": "[concat('https://', parameters('webAppName'), 'azurewebsites.net')]",
-    "aadAppRedirectUri": "[concat('https://', parameters('webAppName'), '.azurewebsites.net/signin-oidc')]",
-    "cliArgs": "[concat(parameters('webAppName'), ' ', variables('aadAppUri'), ' ', variables('aadAppRedirectUri'))]"
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2020-06-01",
-      "name": "[variables('appServicePlanName')]",
-      "location": "[variables('locationName')]",
-      "sku": {
-        "Tier": "Standard",
-        "Name": "S1"
-      },
-      "kind": "linux",
-      "properties": {
-        "name": "[variables('appServicePlanName')]",
-        "workerSizeId": "1",
-        "reserved": true,
-        "numberOfWorkers": "1"
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2020-06-01",
-      "name": "[parameters('webAppName')]",
-      "location": "[variables('locationName')]",
-      "kind": "app,linux",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
-      ],
-      "properties": {
-        "enabled": true,
-        "httpsOnly": true,
-        "reserved": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "siteConfig": {
-          "linuxFxVersion": "[variables('linuxFxVersion')]",
-          "appSettings": [
-            {
-                "name": "DB_HOST",
-                "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "Clevva-Web-App",
+            "metadata": {
+                "description": "Base name of the resource such as Clevva-Web-App."
             },
-            {
-                "name": "DB_USER",
-                "value": "[parameters('DatabaseUser')]"
+            "minLength": 2
+        },
+        "DatabaseUser": {
+            "type": "string",
+            "defaultValue": "clevvapro",
+            "metadata": {
+                "description": "Name of the database user."
             },
-            {
-                "name": "DB_PASS",
-                "value": "[parameters('DatabasePassword')]"
+            "minLength": 4
+        },
+        "DatabasePassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of the database user."
             },
-            {
-                "name": "DB_NAME",
-                "value": "clevva"
-            },
-            {
-                "name": "IS_HTTPS",
-                "value": "true"
-            },
-            {
-                "name": "MYSQL_ATTR_SSL_CA",
-                "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
+            "minLength": 8
+        },
+        "DatabaseResources": {
+            "type": "string",
+            "allowedValues": [
+                "GP_Gen5_4",
+                "GP_Gen5_8",
+                "GP_Gen5_16",
+                "GP_Gen5_32",
+                "GP_Gen5_64"
+            ],
+            "defaultValue": "GP_Gen5_4",
+            "metadata": {
+                "description": "The speed of the database (the number depects the number of vCPU's)."
             }
-          ]
+        },
+        "AutoUpdate": {
+            "type": "bool",
+            "defaultValue": "false",
+            "metadata": {
+                "description": "Set to true if you would like the Clevva software to update automatically"
+            }    
         }
-      }
     },
-    {
-        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-        "name": "[variables('identityName')]",
-        "apiVersion": "2018-11-30",
-        "location": "[variables('locationName')]",
-        "resources": [
-          {
-            "type": "Microsoft.ManagedIdentity/userAssignedIdentities/providers/roleAssignments",
-            "apiVersion": "2020-04-01-preview",
-            "name": "[resourceId(variables('identityName'), '/Microsoft.Authorization/', variables('roleDefinitionName'))]",
+    "variables": {
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
+        "repoURL": "bitbucket.org/clevva/clevva-compiled.git",
+        "branch": "master",
+        "locationName": "[resourceGroup().location]",
+        "linuxFxVersion": "php|7.4"
+    },
+    "resources": [{
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('appServicePlanName')]",
+            "location": "[variables('locationName')]",
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            },
+            "kind": "linux",
+            "properties": {
+                "name": "[variables('appServicePlanName')]",
+                "workerSizeId": "1",
+                "reserved": true,
+                "numberOfWorkers": "1"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('webAppName')]",
+            "location": "[variables('locationName')]",
+            "kind": "app,linux",
             "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
             ],
             "properties": {
-                "roleDefinitionId": "[variables('roleDefinitionId')]",
-                "principalId": "[reference(variables('identityName')).principalId]",
-                "principalType": "ServicePrincipal"
-            }
-          }
-        ]
-    },
-    {
-        "type": "Microsoft.Authorization/roleAssignments",
-        "name": "[guid(variables('identityName'))]",
-        "apiVersion": "2020-04-01-preview",
-        "dependsOn": [
-            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
-        ],
-        "properties": {
-            "roleDefinitionId": "[variables('readerRole')]",
-            "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName')),'2018-11-30').principalId]",
-            "scope": "[resourceGroup().id]"
-        }
-    },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2019-10-01-preview",
-      "name": "[variables('cliResourceName')]",
-      "location": "[variables('locationName')]",
-      "dependsOn": [
-            "[variables('roleDefinitionName')]"
-       ],
-      "kind": "AzureCLI",
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {
-          }
-        }
-      },
-      "properties": {
-        "azCliVersion": "2.0.80",
-        "timeout": "PT2M",
-        "arguments": "[variables('cliArgs')]",
-        "scriptContent": "
-        appInfo=$(az ad app create --display-name $1 --identifier-uris \"$2\" --reply-urls \"$3\")
-        echo $appInfo > $AZ_SCRIPTS_OUTPUT_PATH
-        ",
-        "cleanupPreference": "OnSuccess",
-        "retentionInterval": "P1D"
-      }
-    },
-    {
-        "type": "Microsoft.Web/sites/config",
-        "apiVersion": "2018-02-01",
-        "name": "[concat(parameters('webAppName'), '/web')]",
-        "location": "[variables('locationName')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
-            "[resourceId('Microsoft.Resources/deploymentScripts', variables('cliResourceName'))]"
-        ],
-        "properties": {
-            "numberOfWorkers": 1,
-            "defaultDocuments": [
-                "index.php"
+                "enabled": true,
+                "httpsOnly": true,
+                "reserved": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[variables('linuxFxVersion')]",
+                    "appSettings": [{
+                            "name": "DB_HOST",
+                            "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
+                        },
+                        {
+                            "name": "DB_USER",
+                            "value": "[parameters('DatabaseUser')]"
+                        },
+                        {
+                            "name": "DB_PASS",
+                            "value": "[parameters('DatabasePassword')]"
+                        },
+                        {
+                            "name": "DB_NAME",
+                            "value": "clevva"
+                        },
+                        {
+                            "name": "IS_HTTPS",
+                            "value": "true"
+                        },
+                        {
+                            "name": "MYSQL_ATTR_SSL_CA",
+                            "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
+                        }
+                    ]
+                }
+            },
+            "resources": [{
+                "type": "sourcecontrols",
+                "apiVersion": "2020-06-01",
+                "name": "web",
+                "location": "[variables('locationName')]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+                ],
+                "properties": {
+                    "repoUrl": "[variables('repoURL')]",
+                    "branch": "[variables('branch')]",
+                    "deploymentRollbackEnabled": true,
+                    "isManualIntegration": "[parameters('AutoUpdate')]"
+                }
+            }]
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-02-01",
+            "name": "[concat(parameters('webAppName'), '/web')]",
+            "location": "[variables('locationName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
             ],
-            "netFrameworkVersion": "v4.0",
-            "linuxFxVersion": "[variables('linuxFxVersion')]",
-            "requestTracingEnabled": false,
-            "remoteDebuggingEnabled": false,
-            "remoteDebuggingVersion": "VS2019",
-            "httpLoggingEnabled": false,
-            "logsDirectorySizeLimit": 35,
-            "detailedErrorLoggingEnabled": false,
-            "publishingUsername": "[parameters('webAppName')]",
-            "scmType": "VSTSRM",
-            "use32BitWorkerProcess": true,
-            "webSocketsEnabled": false,
-            "alwaysOn": true,
-            "managedPipelineMode": "Integrated",
-            "virtualApplications": [
-                {
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "[variables('linuxFxVersion')]",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "[parameters('webAppName')]",
+                "scmType": "VSTSRM",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [{
                     "virtualPath": "/",
                     "physicalPath": "site\\wwwroot",
                     "preloadEnabled": true
-                }
-            ],
-            "loadBalancing": "LeastRequests",
-            "autoHealEnabled": false,
-            "localMySqlEnabled": false,
-            "ipSecurityRestrictions": [
-                {
+                }],
+                "loadBalancing": "LeastRequests",
+                "autoHealEnabled": false,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [{
                     "ipAddress": "Any",
                     "action": "Allow",
                     "priority": 1,
                     "name": "Allow all",
                     "description": "Allow all access"
-                }
-            ],
-            "scmIpSecurityRestrictions": [
-                {
+                }],
+                "scmIpSecurityRestrictions": [{
                     "ipAddress": "Any",
                     "action": "Allow",
                     "priority": 1,
                     "name": "Allow all",
                     "description": "Allow all access"
-                }
+                }],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "Disabled",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2020-06-01",
+            "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
+            "location": "[variables('locationName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
-            "scmIpSecurityRestrictionsUseMain": false,
-            "http20Enabled": false,
-            "minTlsVersion": "1.2",
-            "ftpsState": "Disabled",
-            "reservedInstanceCount": 0,
-            "applicationId": "[reference(variables('cliResourceName')).outputs.appId]"
+            "properties": {
+                "siteName": "[parameters('webAppName')]",
+                "hostNameType": "Verified"
+            }
         }
-    },
-    {
-        "type": "Microsoft.Web/sites/hostNameBindings",
-        "apiVersion": "2020-06-01",
-        "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
-        "location": "[variables('locationName')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
-        "properties": {
-            "siteName": "[parameters('webAppName')]",
-            "hostNameType": "Verified"
-        }
-    }
-  ]
+    ]
 }
