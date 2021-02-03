@@ -105,6 +105,10 @@
                             "value": "clevva"
                         },
                         {
+                            "name": "CLEVVA_VERSION",
+                            "value": "2.26"
+                        },
+                        {
                             "name": "IS_HTTPS",
                             "value": "true"
                         },
