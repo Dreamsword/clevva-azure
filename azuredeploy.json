@@ -2,21 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
     "parameters": {
-        "webAppName": {
-            "type": "string",
-            "defaultValue": "Clevva-Web-App",
+        "AutoUpdate": {
+            "type": "bool",
+            "defaultValue": "false",
             "metadata": {
-                "description": "Base name of the resource such as Clevva-Web-App."
-            },
-            "minLength": 2
-        },
-        "DatabaseUser": {
-            "type": "string",
-            "defaultValue": "clevvapro",
-            "metadata": {
-                "description": "Name of the database user."
-            },
-            "minLength": 4
+                "description": "Set to true if you would like the Clevva software to update automatically"
+            }    
         },
         "DatabasePassword": {
             "type": "securestring",
@@ -39,21 +30,30 @@
                 "description": "The speed of the database (the number depects the number of vCPU's)."
             }
         },
-        "AutoUpdate": {
-            "type": "bool",
-            "defaultValue": "false",
+        "DatabaseUser": {
+            "type": "string",
+            "defaultValue": "clevvapro",
             "metadata": {
-                "description": "Set to true if you would like the Clevva software to update automatically"
-            }    
+                "description": "Name of the database user."
+            },
+            "minLength": 4
+        },
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "Clevva-Web-App",
+            "metadata": {
+                "description": "Base name of the resource such as Clevva-Web-App."
+            },
+            "minLength": 2
         }
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
-        "repoURL": "bitbucket.org/clevva/clevva-compiled.git",
         "branch": "master",
+        "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
+        "linuxFxVersion": "php|7.4",
         "locationName": "[resourceGroup().location]",
-        "linuxFxVersion": "php|7.4"
+        "repoURL": "bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
@@ -137,7 +137,7 @@
             "name": "[concat(parameters('webAppName'), '/web')]",
             "location": "[variables('locationName')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "numberOfWorkers": 1,
