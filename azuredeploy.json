@@ -111,6 +111,18 @@
                         {
                             "name": "MYSQL_ATTR_SSL_CA",
                             "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
+                        },
+                        {
+                            "name": "SCM_COMMAND_IDLE_TIMEOUT",
+                            "value": "1800"
+                        },
+                        {
+                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                            "value": "false"
+                        },
+                        {
+                            "name": "SCM_ENABLE_DYNAMIC_INSTALL",
+                            "value": "false"
                         }
                     ]
                 }
