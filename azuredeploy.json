@@ -53,7 +53,7 @@
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "linuxFxVersion": "php|7.4",
         "locationName": "[resourceGroup().location]",
-        "repoURL": "bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://Hein_Reyneke@bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
