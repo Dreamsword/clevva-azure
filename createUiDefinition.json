@@ -10,31 +10,6 @@
 			"isWizard": true
 		},
         "basics": [
-			{
-				"resourceGroup": {
-            	"constraints": {
-            	    "validations": [
-            	        {
-            	            "isValid": "[expression for checking]",
-            	            "message": "Please select a valid resource group."
-            	        }
-            	    ]
-            	},
-            	"allowExisting": true
-        		},
-        		"location": {
-        		    "label": "Custom label for location",
-        		    "toolTip": "provide a useful tooltip",
-        		    "resourceTypes": [
-        		        "Microsoft.Compute/virtualMachines"
-        		    ],
-        		    "allowedValues": [
-        		        "eastus",
-        		        "westus2"
-        		    ],
-        		    "visible": true
-        		}
-    		},
             {
                 "name": "ManualUpdate",
                 "type": "Microsoft.Common.DropDown",
