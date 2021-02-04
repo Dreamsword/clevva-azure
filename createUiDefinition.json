@@ -2,47 +2,53 @@
     "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
     "handler": "Microsoft.Azure.CreateUIDef",
     "version": "0.1.2-preview",
-    "config": {
-        "isWizard": true,
-        "basic": {
-            "description": "Customized description with **markdown**, see [more](https://www.microsoft.com).",
-            "subscription": {
-                "constraints": {
-                    "validations": [{
-                            "isValid": "[expression for checking]",
-                            "message": "Please select a valid subscription."
-                        },
-                        {
-                            "permission": "<Resource Provider>/<Action>",
-                            "message": "Must have correct permission to complete this step."
-                        }
+    "parameters": {
+        "config": {
+            "isWizard": true,
+            "basic": {
+                "description": "Customized description with **markdown**, see [more](https://www.microsoft.com).",
+                "subscription": {
+                    "constraints": {
+                        "validations": [{
+                                "isValid": "[expression for checking]",
+                                "message": "Please select a valid subscription."
+                            },
+                            {
+                                "permission": "<Resource Provider>/<Action>",
+                                "message": "Must have correct permission to complete this step."
+                            }
+                        ]
+                    },
+                    "resourceProviders": [
+                        "<Resource Provider>"
                     ]
                 },
-                "resourceProviders": [
-                    "<Resource Provider>"
-                ]
-            },
-            "resourceGroup": {
-                "constraints": {
-                    "validations": [{
-                        "isValid": "[expression for checking]",
-                        "message": "Please select a valid resource group."
-                    }]
+                "resourceGroup": {
+                    "constraints": {
+                        "validations": [{
+                            "isValid": "[expression for checking]",
+                            "message": "Please select a valid resource group."
+                        }]
+                    },
+                    "allowExisting": true
                 },
-                "allowExisting": true
-            },
-            "location": {
-                "label": "Custom label for location",
-                "toolTip": "provide a useful tooltip",
-                "resourceTypes": [
-                    "Microsoft.Compute/virtualMachines"
-                ],
-                "allowedValues": [
-                    "eastus",
-                    "westus2"
-                ],
-                "visible": true
+                "location": {
+                    "label": "Custom label for location",
+                    "toolTip": "provide a useful tooltip",
+                    "resourceTypes": [
+                        "Microsoft.Compute/virtualMachines"
+                    ],
+                    "allowedValues": [
+                        "eastus",
+                        "westus2"
+                    ],
+                    "visible": true
+                }
             }
-        }
+        },
+        "basics": [],
+        "steps": [],
+        "outputs": {},
+        "resourceTypes": []
     }
 }
