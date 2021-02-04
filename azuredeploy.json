@@ -49,7 +49,6 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "branch": "master",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "linuxFxVersion": "php|7.4",
         "locationName": "[resourceGroup().location]",
@@ -141,7 +140,6 @@
                 ],
                 "properties": {
                     "repoUrl": "[variables('repoURL')]",
-                    "branch": "[variables('branch')]",
                     "deploymentRollbackEnabled": true,
                     "isManualIntegration": "[parameters('AutoUpdate')]"
                 }
