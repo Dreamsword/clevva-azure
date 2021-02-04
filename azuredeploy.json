@@ -2,11 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
     "parameters": {
-        "AutoUpdate": {
+        "ManualUpdate": {
             "type": "bool",
-            "defaultValue": "false",
+            "defaultValue": "true",
             "metadata": {
-                "description": "Set to true if you would like the Clevva software to update automatically"
+                "description": "Set to false if you would like the Clevva software to update automatically"
             }    
         },
         "DatabasePassword": {
@@ -49,10 +49,11 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "branch": "master",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "linuxFxVersion": "php|7.4",
         "locationName": "[resourceGroup().location]",
-        "repoURL": "https://Hein_Reyneke@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
@@ -140,8 +141,9 @@
                 ],
                 "properties": {
                     "repoUrl": "[variables('repoURL')]",
+                    "branch": "[variables('branch')]",
                     "deploymentRollbackEnabled": true,
-                    "isManualIntegration": "[parameters('AutoUpdate')]"
+                    "isManualIntegration": "[parameters('ManualUpdate')]"
                 }
             }]
         },
