@@ -3,42 +3,144 @@
     "handler": "Microsoft.Azure.CreateUIDef",
     "version": "0.1.2-preview",
     "parameters": {
-        "config": {
-            "basics": {
-                "description": "Customized description with **markdown**, see [more](https://www.microsoft.com).",
-                "subscription": {
-                    "constraints": {
-                        "validations": [{
-                                "isValid": "[expression for checking]",
-                                "message": "Please select a valid subscription."
-                            }
-                        ]
-                    }
-                },
-                "resourceGroup": {
-                    "constraints": {
-                        "validations": [{
-                            "isValid": "[expression for checking]",
-                            "message": "Please select a valid resource group."
-                        }]
-                    }
-                },
-                "location": {
-                    "label": "Custom label for location",
-                    "toolTip": "provide a useful tooltip",
-                    "resourceTypes": [
-                        "Microsoft.Compute/virtualMachines"
-                    ],
+        "resourceTypes": [
+            "microsoft.resources/resourcegroups"
+        ],
+		"config": {
+			"isWizard": true
+		},
+        "basics": [
+			{
+				"resourceGroup": {
+            	"constraints": {
+            	    "validations": [
+            	        {
+            	            "isValid": "[expression for checking]",
+            	            "message": "Please select a valid resource group."
+            	        }
+            	    ]
+            	},
+            	"allowExisting": true
+        		},
+        		"location": {
+        		    "label": "Custom label for location",
+        		    "toolTip": "provide a useful tooltip",
+        		    "resourceTypes": [
+        		        "Microsoft.Compute/virtualMachines"
+        		    ],
+        		    "allowedValues": [
+        		        "eastus",
+        		        "westus2"
+        		    ],
+        		    "visible": true
+        		}
+    		},
+            {
+                "name": "ManualUpdate",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Manual Update",
+                "defaultValue": "true",
+                "toolTip": "Set to false if you would like the Clevva software to update automatically",
+                "constraints": {
+                    "required": false,
                     "allowedValues": [
-                        "eastus",
-                        "westus2"
-                    ],
-                    "visible": true
-                }
+                        {
+                            "label": "true",
+                            "value": true
+                        },
+                        {
+                            "label": "false",
+                            "value": false
+                        }
+                    ]
+                },
+                "visible": true
+            },
+            {
+                "name": "DatabasePassword",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                    "password": "Database Password",
+                    "confirmPassword": "Confirm password"
+                },
+                "toolTip": "Password of the database user.",
+                "constraints": {
+                    "required": true,
+                    "regex": "",
+                    "validationMessage": ""
+                },
+                "options": {
+                    "hideConfirmation": true
+                },
+                "visible": true
+            },
+            {
+                "name": "DatabaseResources",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Database Resources",
+                "defaultValue": "GP_Gen5_4",
+                "toolTip": "The speed of the database (the number depects the number of vCPU's).",
+                "constraints": {
+                    "required": false,
+                    "allowedValues": [
+                        {
+                            "label": "GP_Gen5_4",
+                            "value": "GP_Gen5_4"
+                        },
+                        {
+                            "label": "GP_Gen5_8",
+                            "value": "GP_Gen5_8"
+                        },
+                        {
+                            "label": "GP_Gen5_16",
+                            "value": "GP_Gen5_16"
+                        },
+                        {
+                            "label": "GP_Gen5_32",
+                            "value": "GP_Gen5_32"
+                        },
+                        {
+                            "label": "GP_Gen5_64",
+                            "value": "GP_Gen5_64"
+                        }
+                    ]
+                },
+                "visible": true
+            },
+            {
+                "name": "DatabaseUser",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Database User",
+                "defaultValue": "clevvapro",
+                "toolTip": "Name of the database user.",
+                "constraints": {
+                    "required": false,
+                    "regex": "",
+                    "validationMessage": ""
+                },
+                "visible": true
+            },
+            {
+                "name": "webAppName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Web App Name",
+                "defaultValue": "Clevva-Web-App",
+                "toolTip": "Base name of the resource such as Clevva-Web-App.",
+                "constraints": {
+                    "required": false,
+                    "regex": "",
+                    "validationMessage": ""
+                },
+                "visible": true
             }
-        },
-        "basics": [],
+        ],
         "steps": [],
-        "outputs": {}
+        "outputs": {
+            "ManualUpdate": "[basics('ManualUpdate')]",
+            "DatabasePassword": "[basics('DatabasePassword')]",
+            "DatabaseResources": "[basics('DatabaseResources')]",
+            "DatabaseUser": "[basics('DatabaseUser')]",
+            "webAppName": "[basics('webAppName')]"
+        }
     }
 }
