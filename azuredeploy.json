@@ -49,6 +49,7 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "branch": "master",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "linuxFxVersion": "php|7.4",
         "locationName": "[resourceGroup().location]",
@@ -132,14 +133,15 @@
             },
             "resources": [{
                 "type": "sourcecontrols",
-                "apiVersion": "2020-06-01",
-                "name": "source",
+                "apiVersion": "2020-09-01",
+                "name": "deploy",
                 "location": "[variables('locationName')]",
                 "dependsOn": [
                     "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
                 ],
                 "properties": {
                     "repoUrl": "[variables('repoURL')]",
+                    "branch": "[variables('branch')]",
                     "deploymentRollbackEnabled": true,
                     "isManualIntegration": "[parameters('AutoUpdate')]"
                 }
