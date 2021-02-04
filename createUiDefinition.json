@@ -4,24 +4,16 @@
     "version": "0.1.2-preview",
     "parameters": {
         "config": {
-            "isWizard": true,
-            "basic": {
+            "basics": {
                 "description": "Customized description with **markdown**, see [more](https://www.microsoft.com).",
                 "subscription": {
                     "constraints": {
                         "validations": [{
                                 "isValid": "[expression for checking]",
                                 "message": "Please select a valid subscription."
-                            },
-                            {
-                                "permission": "<Resource Provider>/<Action>",
-                                "message": "Must have correct permission to complete this step."
                             }
                         ]
-                    },
-                    "resourceProviders": [
-                        "<Resource Provider>"
-                    ]
+                    }
                 },
                 "resourceGroup": {
                     "constraints": {
@@ -29,8 +21,7 @@
                             "isValid": "[expression for checking]",
                             "message": "Please select a valid resource group."
                         }]
-                    },
-                    "allowExisting": true
+                    }
                 },
                 "location": {
                     "label": "Custom label for location",
@@ -48,7 +39,6 @@
         },
         "basics": [],
         "steps": [],
-        "outputs": {},
-        "resourceTypes": []
+        "outputs": {}
     }
 }
