@@ -541,11 +541,5 @@
                 "retentionDays": 0
             }
         }
-    ],
-    "outputs": {
-        "location": {
-            "type": "string",
-            "value": "[parameters('location')]"
-        }
-    }
+    ]
 }
