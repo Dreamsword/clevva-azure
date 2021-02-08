@@ -1,6 +1,52 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
+        "parameters": {
+        "ManualUpdate": {
+            "type": "bool",
+            "defaultValue": "true",
+            "metadata": {
+                "description": "Set to false if you would like the Clevva software to update automatically"
+            }    
+        },
+        "DatabasePassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of the database user."
+            },
+            "minLength": 8
+        },
+        "DatabaseResources": {
+            "type": "string",
+            "allowedValues": [
+                "GP_Gen5_4",
+                "GP_Gen5_8",
+                "GP_Gen5_16",
+                "GP_Gen5_32",
+                "GP_Gen5_64"
+            ],
+            "defaultValue": "GP_Gen5_4",
+            "metadata": {
+                "description": "The speed of the database (the number depects the number of vCPU's)."
+            }
+        },
+        "DatabaseUser": {
+            "type": "string",
+            "defaultValue": "clevvapro",
+            "metadata": {
+                "description": "Name of the database user."
+            },
+            "minLength": 4
+        },
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "Clevva-Web-App",
+            "metadata": {
+                "description": "Base name of the resource such as Clevva-Web-App."
+            },
+            "minLength": 2
+        }
+    },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
         "branch": "master",
