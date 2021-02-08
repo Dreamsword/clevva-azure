@@ -546,5 +546,6 @@
         "location": {
             "type": "string",
             "value": "[parameters('location')]"
+        }
     }
 }
