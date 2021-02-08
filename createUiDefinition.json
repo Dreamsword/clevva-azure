@@ -28,8 +28,8 @@
             		    "toolTip": "Base name of the resource such as Clevva-Web-App.",
             		    "constraints": {
             		        "required": false,
-            		        "regex": "",
-            		        "validationMessage": ""
+                            "regex": "^[a-z0-9A-Z-]{3,79}$",
+                            "validationMessage": "The name must be between 3 and 79 characters long and contain letters, numbers and hyphens only."
             		    },
             		    "visible": true
             		},
@@ -41,6 +41,13 @@
                         "recommendedSizes": [
                             "Standard_B4ms"
                         ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_B2ms",
+                                "Standard_B4ms",
+                                "Standard_D8s_v3"
+                            ]
+                        },
                         "osPlatform": "Linux",
                         "count": "1"
                     },
@@ -84,8 +91,8 @@
             		    "toolTip": "Name of the database user.",
             		    "constraints": {
             		        "required": false,
-            		        "regex": "",
-            		        "validationMessage": ""
+                            "regex": "^[a-z0-9A-Z]{4,30}$",
+                            "validationMessage": "Only alphanumeric characters are allowed, and the value must be 4-30 characters long."
             		    },
             		    "visible": true
             		},
@@ -99,11 +106,11 @@
             		    "toolTip": "Password of the database user.",
             		    "constraints": {
             		        "required": true,
-            		        "regex": "",
-            		        "validationMessage": ""
+                            "regex": "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[\\w~@#$%^&*+=|{}:;!.?\\()\\[\\]-]{12,}$",
+                            "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase, 1 lowercase and 1 number."
             		    },
             		    "options": {
-            		        "hideConfirmation": true
+            		        "hideConfirmation": false
             		    },
             		    "visible": true
             		},
@@ -136,10 +143,12 @@
 		],
         "outputs": {
 			"webAppName": "[steps('webAppConfig').webAppName.name]",
-            "ManualUpdate": "[steps('webAppConfig').manualUpdate.value]",
-            "DatabaseUser": "[steps('dbConfig').databaseUser.name]",
-			"DatabasePassword": "[steps('dbConfig').databasePassword.value]",
-			"DatabaseResources": "[steps('dbConfig'.databaseResources.value)]"
+            "webAppSize": "[steps('webAappConfig).webAppSize.vmSize]",
+            "ManualUpdate": "[steps('webAppConfig').manualUpdate]",
+            "DatabaseUser": "[steps('dbConfig').databaseUser]",
+			"DatabasePassword": "[steps('dbConfig').databasePassword]",
+			"DatabaseResources": "[steps('dbConfig').databaseResources]",
+            "Location": "[location()]"
         }
     }
 }
