@@ -543,6 +543,8 @@
         }
     ],
     "outputs": {
-        "location": "[parameters('location')]"
+        "location": {
+            "type": "string",
+            "value": "[parameters('location')]"
     }
 }
