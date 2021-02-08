@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "Password of the database user."
             },
-            "minLength": 8
+            "minLength": 12
         },
         "DatabaseResources": {
             "type": "string",
@@ -34,7 +34,7 @@
             "metadata": {
                 "description": "Name of the database user."
             },
-            "minLength": 12
+            "minLength": 4
         },
         "webAppName": {
             "type": "string",
@@ -42,7 +42,7 @@
             "metadata": {
                 "description": "Base name of the resource such as Clevva-Web-App."
             },
-            "minLength": 2
+            "minLength": 3
         },
         "webAppSize": {
             "type": "string",
@@ -541,5 +541,11 @@
                 "retentionDays": 0
             }
         }
-    ]
+    ],
+    "outputs": {
+        "location": {
+            "type": "string",
+            "value": "[parameters('location')]"
+        }
+    }
 }
