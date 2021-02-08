@@ -9,113 +9,137 @@
 		"config": {
 			"isWizard": true
 		},
-        "basics": [
-            {
-                "name": "ManualUpdate",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Manual Update",
-                "defaultValue": "true",
-                "toolTip": "Set to false if you would like the Clevva software to update automatically",
-                "constraints": {
-                    "required": false,
-                    "allowedValues": [
-                        {
-                            "label": "true",
-                            "value": true
-                        },
-                        {
-                            "label": "false",
-                            "value": false
-                        }
-                    ]
+        "basics": [],
+        "steps": [
+			{
+				"name": "webAppConfig",
+                "label": "WebApp Settings",
+                "subLabel": {
+                    "preValidation": "Configure the WebApp's resources and settings",
+                    "postValidation": "Done"
                 },
-                "visible": true
-            },
-            {
-                "name": "DatabasePassword",
-                "type": "Microsoft.Common.PasswordBox",
-                "label": {
-                    "password": "Database Password",
-                    "confirmPassword": "Confirm password"
+                "bladeTitle": "WebApp Settings",
+                "elements": [
+					{
+            		    "name": "webAppName",
+            		    "type": "Microsoft.Common.TextBox",
+            		    "label": "Web App Name",
+            		    "defaultValue": "Clevva-Web-App",
+            		    "toolTip": "Base name of the resource such as Clevva-Web-App.",
+            		    "constraints": {
+            		        "required": false,
+            		        "regex": "",
+            		        "validationMessage": ""
+            		    },
+            		    "visible": true
+            		},
+                    {
+                        "name": "webAppSize",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "WebApp size",
+                        "toolTip": "The size of WebApp to provision.",
+                        "recommendedSizes": [
+                            "Standard_B4ms"
+                        ],
+                        "osPlatform": "Linux",
+                        "count": "1"
+                    },
+					{
+                		"name": "manualUpdate",
+                		"type": "Microsoft.Common.DropDown",
+                		"label": "Manual Update",
+                		"defaultValue": "true",
+                		"toolTip": "Set to false if you would like the Clevva software to update automatically",
+                		"constraints": {
+                		    "required": false,
+                		    "allowedValues": [
+                		        {
+                		            "label": "true",
+                		            "value": true
+                		        },
+                		        {
+                		            "label": "false",
+                		            "value": false
+                		        }
+                		    ]
+                		},
+                		"visible": true
+            		}
+				]
+			},
+			{
+				"name": "dbConfig",
+                "label": "Database Settings",
+                "subLabel": {
+                    "preValidation": "Configure the Database's resources and settings",
+                    "postValidation": "Done"
                 },
-                "toolTip": "Password of the database user.",
-                "constraints": {
-                    "required": true,
-                    "regex": "",
-                    "validationMessage": ""
-                },
-                "options": {
-                    "hideConfirmation": true
-                },
-                "visible": true
-            },
-            {
-                "name": "DatabaseResources",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Database Resources",
-                "defaultValue": "GP_Gen5_4",
-                "toolTip": "The speed of the database (the number depects the number of vCPU's).",
-                "constraints": {
-                    "required": false,
-                    "allowedValues": [
-                        {
-                            "label": "GP_Gen5_4",
-                            "value": "GP_Gen5_4"
-                        },
-                        {
-                            "label": "GP_Gen5_8",
-                            "value": "GP_Gen5_8"
-                        },
-                        {
-                            "label": "GP_Gen5_16",
-                            "value": "GP_Gen5_16"
-                        },
-                        {
-                            "label": "GP_Gen5_32",
-                            "value": "GP_Gen5_32"
-                        },
-                        {
-                            "label": "GP_Gen5_64",
-                            "value": "GP_Gen5_64"
-                        }
-                    ]
-                },
-                "visible": true
-            },
-            {
-                "name": "DatabaseUser",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Database User",
-                "defaultValue": "clevvapro",
-                "toolTip": "Name of the database user.",
-                "constraints": {
-                    "required": false,
-                    "regex": "",
-                    "validationMessage": ""
-                },
-                "visible": true
-            },
-            {
-                "name": "webAppName",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Web App Name",
-                "defaultValue": "Clevva-Web-App",
-                "toolTip": "Base name of the resource such as Clevva-Web-App.",
-                "constraints": {
-                    "required": false,
-                    "regex": "",
-                    "validationMessage": ""
-                },
-                "visible": true
-            }
-        ],
-        "steps": [],
+                "bladeTitle": "Database Settings",
+                "elements": [
+            		{
+            		    "name": "databaseUser",
+            		    "type": "Microsoft.Common.TextBox",
+            		    "label": "Database User",
+            		    "defaultValue": "clevvapro",
+            		    "toolTip": "Name of the database user.",
+            		    "constraints": {
+            		        "required": false,
+            		        "regex": "",
+            		        "validationMessage": ""
+            		    },
+            		    "visible": true
+            		},
+            		{
+            		    "name": "databasePassword",
+            		    "type": "Microsoft.Common.PasswordBox",
+            		    "label": {
+            		        "password": "Database Password",
+            		        "confirmPassword": "Confirm password"
+            		    },
+            		    "toolTip": "Password of the database user.",
+            		    "constraints": {
+            		        "required": true,
+            		        "regex": "",
+            		        "validationMessage": ""
+            		    },
+            		    "options": {
+            		        "hideConfirmation": true
+            		    },
+            		    "visible": true
+            		},
+            		{
+            		    "name": "databaseResources",
+            		    "type": "Microsoft.Common.DropDown",
+            		    "label": "Database Resources",
+            		    "toolTip": "Entry Level: 4vCPU; Mid Level: 16vCPU; Enterprise: 64vCPU",
+            		    "constraints": {
+            		        "required": true,
+            		        "allowedValues": [
+            		            {
+            		                "label": "Entry Level Speed",
+            		                "value": "GP_Gen5_4"
+            		            },
+            		            {
+            		                "label": "Mid Level Speed",
+            		                "value": "GP_Gen5_16"
+            		            },
+            		            {
+            		                "label": "Enterprise Level Speed",
+            		                "value": "GP_Gen5_64"
+            		            }
+            		        ]
+            		    },
+            		    "visible": true
+            		}
+				]
+			}
+		],
         "outputs": {
-            "ManualUpdate": "[basics('ManualUpdate')]",
-            "DatabasePassword": "[basics('DatabasePassword')]",
-            "DatabaseResources": "[basics('DatabaseResources')]",
-            "DatabaseUser": "[basics('DatabaseUser')]",
-            "webAppName": "[basics('webAppName')]"
+			"webAppName": "[steps('webAppConfig').webAppName.name]",
+            "ManualUpdate": "[steps('webAppConfig').manualUpdate.value]",
+            "DatabaseUser": "[steps('dbConfig').databaseUser.name]",
+			"DatabasePassword": "[steps('dbConfig').databasePassword.value]",
+			"DatabaseResources": "[steps('dbConfig'.databaseResources.value)]"
         }
     }
 }
