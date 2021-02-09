@@ -33,24 +33,6 @@
             		    },
             		    "visible": true
             		},
-                    {
-                        "name": "webAppSize",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "WebApp size",
-                        "toolTip": "The size of WebApp to provision.",
-                        "recommendedSizes": [
-                            "Standard_B4ms"
-                        ],
-                        "constraints": {
-                            "allowedSizes": [
-                                "Standard_B2ms",
-                                "Standard_B4ms",
-                                "Standard_D8s_v3"
-                            ]
-                        },
-                        "osPlatform": "Linux",
-                        "count": "1"
-                    },
 					{
                 		"name": "manualUpdate",
                 		"type": "Microsoft.Common.DropDown",
@@ -143,7 +125,6 @@
 		],
         "outputs": {
 			"webAppName": "[steps('webAppConfig').webAppName.name]",
-            "webAppSize": "[steps('webAappConfig).webAppSize.vmSize]",
             "ManualUpdate": "[steps('webAppConfig').manualUpdate]",
             "DatabaseUser": "[steps('dbConfig').databaseUser]",
 			"DatabasePassword": "[steps('dbConfig').databasePassword]",
