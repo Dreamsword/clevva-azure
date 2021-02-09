@@ -141,7 +141,8 @@
                 "name": "web",
                 "location": "[parameters('location')]",
                 "dependsOn": [
-                    "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+                    "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+                    "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
                 ],
                 "properties": {
                     "repoUrl": "[variables('repoURL')]",
