@@ -46,11 +46,11 @@
         },
         "webAppSize": {
             "type": "string",
-            "defaultValue": "Standard_B4ms",
+            "defaultValue": "B4ms",
             "allowedValues": [
-                "Standard_B2ms",
-                "Standard_B4ms",
-                "Standard_D8s_v3"
+                "B2ms",
+                "B4ms",
+                "D8s_v3"
             ],
             "metadata": {
                 "description": "Base name of the resource such as Clevva-Web-App."
