@@ -11,13 +11,12 @@
 		},
         "basics": [
 			{
-                "name": "Location",
+                "name": "location",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Location",
-                "defaultValue": "[[resourceGroup().location]",
                 "toolTip": "Location for all resources.",
                 "constraints": {
-                    "required": false,
+                    "required": true,
                     "allowedValues": [
                         {
                             "label": "eastasia",
@@ -231,7 +230,7 @@
             "DatabaseUser": "[steps('dbConfig').databaseUser]",
 			"DatabasePassword": "[steps('dbConfig').databasePassword]",
 			"DatabaseResources": "[steps('dbConfig').databaseResources]",
-            "Location": "[basics('location')]"
+            "location": "[basics('location')]"
         }
     }
 }
