@@ -91,12 +91,6 @@
                 "primaryScriptURI": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/scripts/deploymentScript.sh",
                 "cleanupPreference": "Always",
                 "retentionInterval": "P1D"
-            },
-            "outputs": {
-                "tag": {
-                    "type": "string",
-                    "value": "[reference('getLatestTag').outputs.tag]"
-                }
             }
         },
         {
