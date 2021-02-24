@@ -47,6 +47,29 @@
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
+            "allowedValues": [
+                "eastasia",
+                "southeastasia",
+                "australiaeast",
+                "brazilsouth",
+                "canadacentral",
+                "eastus2",
+                "eastus",
+                "centralus",
+                "northcentralus",
+                "francecentral",
+                "uksouth",
+                "centralindia",
+                "southindia",
+                "japaneast",
+                "koreacentral",
+                "northeurope",
+                "westcentralus",
+                "westeurope",
+                "westus2",
+                "westus",
+                "southcentralus"
+            ],
             "metadata": {
               "description": "Location for all resources."
               }
