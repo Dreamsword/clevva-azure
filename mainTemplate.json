@@ -151,7 +151,7 @@
                         },
                         {
                             "name": "CLEVVA_VERSION",
-                            "value": "2.26"
+                            "value": "[outputs('tag')]"
                         },
                         {
                             "name": "IS_HTTPS",

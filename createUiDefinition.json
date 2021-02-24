@@ -9,8 +9,7 @@
 		"config": {
 			"isWizard": true
 		},
-        "basics": [],
-        "steps": [
+        "basics": [
 			{
                 "name": "Location",
                 "type": "Microsoft.Common.DropDown",
@@ -111,7 +110,9 @@
                     ]
                 },
                 "visible": true
-            },
+            }
+		],
+        "steps": [
 			{
 				"name": "webAppConfig",
                 "label": "WebApp Settings",
@@ -230,7 +231,7 @@
             "DatabaseUser": "[steps('dbConfig').databaseUser]",
 			"DatabasePassword": "[steps('dbConfig').databasePassword]",
 			"DatabaseResources": "[steps('dbConfig').databaseResources]",
-            "Location": "[steps('location')]"
+            "Location": "[basics('location')]"
         }
     }
 }
