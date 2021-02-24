@@ -12,6 +12,107 @@
         "basics": [],
         "steps": [
 			{
+                "name": "Location",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Location",
+                "defaultValue": "[[resourceGroup().location]",
+                "toolTip": "Location for all resources.",
+                "constraints": {
+                    "required": false,
+                    "allowedValues": [
+                        {
+                            "label": "eastasia",
+                            "value": "eastasia"
+                        },
+                        {
+                            "label": "southeastasia",
+                            "value": "southeastasia"
+                        },
+                        {
+                            "label": "australiaeast",
+                            "value": "australiaeast"
+                        },
+                        {
+                            "label": "brazilsouth",
+                            "value": "brazilsouth"
+                        },
+                        {
+                            "label": "canadacentral",
+                            "value": "canadacentral"
+                        },
+                        {
+                            "label": "eastus2",
+                            "value": "eastus2"
+                        },
+                        {
+                            "label": "eastus",
+                            "value": "eastus"
+                        },
+                        {
+                            "label": "centralus",
+                            "value": "centralus"
+                        },
+                        {
+                            "label": "northcentralus",
+                            "value": "northcentralus"
+                        },
+                        {
+                            "label": "francecentral",
+                            "value": "francecentral"
+                        },
+                        {
+                            "label": "uksouth",
+                            "value": "uksouth"
+                        },
+                        {
+                            "label": "centralindia",
+                            "value": "centralindia"
+                        },
+                        {
+                            "label": "southindia",
+                            "value": "southindia"
+                        },
+                        {
+                            "label": "japaneast",
+                            "value": "japaneast"
+                        },
+                        {
+                            "label": "koreacentral",
+                            "value": "koreacentral"
+                        },
+                        {
+                            "label": "northeurope",
+                            "value": "northeurope"
+                        },
+                        {
+                            "label": "westcentralus",
+                            "value": "westcentralus"
+                        },
+                        {
+                            "label": "westeurope",
+                            "value": "westeurope"
+                        },
+                        {
+                            "label": "westus2",
+                            "value": "westus2"
+                        },
+                        {
+                            "label": "westus",
+                            "value": "westus"
+                        },
+                        {
+                            "label": "southcentralus",
+                            "value": "southcentralus"
+                        },
+                        {
+                            "label": "[concat('', '[resourceGroup().location]')]",
+                            "value": "[concat('', '[resourceGroup().location]')]"
+                        }
+                    ]
+                },
+                "visible": true
+            },
+			{
 				"name": "webAppConfig",
                 "label": "WebApp Settings",
                 "subLabel": {
@@ -129,7 +230,7 @@
             "DatabaseUser": "[steps('dbConfig').databaseUser]",
 			"DatabasePassword": "[steps('dbConfig').databasePassword]",
 			"DatabaseResources": "[steps('dbConfig').databaseResources]",
-            "Location": "[location()]"
+            "Location": "[steps('location')]"
         }
     }
 }
