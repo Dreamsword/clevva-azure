@@ -128,7 +128,7 @@
                         },
                         {
                             "name": "CLEVVA_VERSION",
-                            "value": "[outputs('tags')]"
+                            "value": "2.26"
                         },
                         {
                             "name": "IS_HTTPS",
@@ -399,6 +399,10 @@
         "location": {
             "type": "string",
             "value": "[parameters('location')]"
+        },
+        "tag": {
+            "type": "string",
+            "value": "[reference('getLatestTag').outputs.tag]"
         }
     }
 }
