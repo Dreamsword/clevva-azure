@@ -19,7 +19,7 @@
         }
     },
     "variables": {
-        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]"
     },
     "resources": [
         {
@@ -40,62 +40,20 @@
             }
         },
         {
-            "type": "Microsoft.Web/sites",
-            "apiVersion": "2020-06-01",
-            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/customApis",
+            "apiVersion": "2016-06-01",
+            "name": "Account_Creation",
             "location": "[parameters('location')]",
-            "kind": "app,linux",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-            ],
             "properties": {
-                "enabled": true,
-                "httpsOnly": true,
-                "reserved": true,
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-                "siteConfig": {
-                    "linuxFxVersion": "[variables('linuxFxVersion')]",
-                    "appSettings": [{
-                            "name": "DB_HOST",
-                            "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
-                        },
-                        {
-                            "name": "DB_USER",
-                            "value": "[variables('databaseUsername')]"
-                        },
-                        {
-                            "name": "DB_PASS",
-                            "value": "[variables('databasePassword')]"
-                        },
-                        {
-                            "name": "DB_NAME",
-                            "value": "clevva"
-                        },
-                        {
-                            "name": "CLEVVA_VERSION",
-                            "value": "[outputs('tag')]"
-                        },
-                        {
-                            "name": "IS_HTTPS",
-                            "value": "true"
-                        },
-                        {
-                            "name": "MYSQL_ATTR_SSL_CA",
-                            "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
-                        },
-                        {
-                            "name": "SCM_COMMAND_IDLE_TIMEOUT",
-                            "value": "1800"
-                        },
-                        {
-                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-                            "value": "false"
-                        },
-                        {
-                            "name": "SCM_ENABLE_DYNAMIC_INSTALL",
-                            "value": "false"
-                        }
-                    ]
+                "connectionParameters": {
+                    "apikey": "j1065753a0e391dfb584963b25c1e987",
+                    "Content-Type": "application/json"
+                },
+                "description": "API call to a Clevva server to register this account",
+                "displayName": "Clevva Account",
+                "apiType": "Rest",
+                "backendService": {
+                    "serviceUrl": "https://digiblu.clevva.com/api/va/start"
                 }
             }
         }
