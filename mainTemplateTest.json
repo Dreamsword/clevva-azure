@@ -38,24 +38,6 @@
                 "reserved": true,
                 "numberOfWorkers": "1"
             }
-        },
-        {
-            "type": "Microsoft.Web/customApis",
-            "apiVersion": "2016-06-01",
-            "name": "Account_Creation",
-            "location": "[parameters('location')]",
-            "properties": {
-                "connectionParameters": {
-                    "apikey": "j1065753a0e391dfb584963b25c1e987",
-                    "Content-Type": "application/json"
-                },
-                "description": "API call to a Clevva server to register this account",
-                "displayName": "Clevva Account",
-                "apiType": "Rest",
-                "backendService": {
-                    "serviceUrl": "https://digiblu.clevva.com/api/va/start"
-                }
-            }
         }
     ]
 }
