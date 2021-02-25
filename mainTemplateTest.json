@@ -1,0 +1,79 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+        "parameters": {
+        "ManualUpdate": {
+            "type": "bool",
+            "defaultValue": "true",
+            "metadata": {
+                "description": "Set to false if you would like the Clevva software to update automatically"
+            }    
+        },
+        "DatabaseResources": {
+            "type": "string",
+            "allowedValues": [
+                "GP_Gen5_4",
+                "GP_Gen5_16",
+                "GP_Gen5_64"
+            ],
+            "defaultValue": "GP_Gen5_4",
+            "metadata": {
+                "description": "The speed of the database (the number depects the number of vCPU's)."
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "Clevva-Web-App",
+            "metadata": {
+                "description": "Base name of the resource such as Clevva-Web-App."
+            },
+            "minLength": 3
+        }
+    },
+    "variables": {
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "branch": "master",
+        "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
+        "databaseUsername": "clevvapro",
+        "databasePassword": "[concat('C', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'a', '!')]",
+        "linuxFxVersion": "php|7.4",
+        "locationName": ["resourceGroup().location"],
+        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git"
+    },
+    "resources": [{
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('appServicePlanName')]",
+            "location": "[variables('locationName')]",
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            },
+            "kind": "linux",
+            "properties": {
+                "name": "[variables('appServicePlanName')]",
+                "workerSizeId": "1",
+                "reserved": true,
+                "numberOfWorkers": "1"
+            }
+        },
+        {
+            "type": "Microsoft.Web/customApis",
+            "apiVersion": "2016-06-01",
+            "name": "Account_Creation",
+            "location": "[variables('locationName')]",
+            "properties": {
+                "connectionParameters": {
+                    "apikey": "j1065753a0e391dfb584963b25c1e987",
+                    "Content-Type": "application/json"
+                },
+                "description": "API call to a Clevva server to register this account",
+                "displayName": "Clevva Account",
+                "apiType": "Rest",
+                "backendService": {
+                    "serviceUrl": "https://digiblu.clevva.com/api/va/start"
+                }
+            }
+        }
+    ]
+}

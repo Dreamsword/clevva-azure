@@ -9,108 +9,7 @@
 		"config": {
 			"isWizard": true
 		},
-        "basics": [
-			{
-                "name": "location",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Location",
-                "toolTip": "Location for all resources.",
-                "constraints": {
-                    "required": true,
-                    "allowedValues": [
-                        {
-                            "label": "eastasia",
-                            "value": "eastasia"
-                        },
-                        {
-                            "label": "southeastasia",
-                            "value": "southeastasia"
-                        },
-                        {
-                            "label": "australiaeast",
-                            "value": "australiaeast"
-                        },
-                        {
-                            "label": "brazilsouth",
-                            "value": "brazilsouth"
-                        },
-                        {
-                            "label": "canadacentral",
-                            "value": "canadacentral"
-                        },
-                        {
-                            "label": "eastus2",
-                            "value": "eastus2"
-                        },
-                        {
-                            "label": "eastus",
-                            "value": "eastus"
-                        },
-                        {
-                            "label": "centralus",
-                            "value": "centralus"
-                        },
-                        {
-                            "label": "northcentralus",
-                            "value": "northcentralus"
-                        },
-                        {
-                            "label": "francecentral",
-                            "value": "francecentral"
-                        },
-                        {
-                            "label": "uksouth",
-                            "value": "uksouth"
-                        },
-                        {
-                            "label": "centralindia",
-                            "value": "centralindia"
-                        },
-                        {
-                            "label": "southindia",
-                            "value": "southindia"
-                        },
-                        {
-                            "label": "japaneast",
-                            "value": "japaneast"
-                        },
-                        {
-                            "label": "koreacentral",
-                            "value": "koreacentral"
-                        },
-                        {
-                            "label": "northeurope",
-                            "value": "northeurope"
-                        },
-                        {
-                            "label": "westcentralus",
-                            "value": "westcentralus"
-                        },
-                        {
-                            "label": "westeurope",
-                            "value": "westeurope"
-                        },
-                        {
-                            "label": "westus2",
-                            "value": "westus2"
-                        },
-                        {
-                            "label": "westus",
-                            "value": "westus"
-                        },
-                        {
-                            "label": "southcentralus",
-                            "value": "southcentralus"
-                        },
-                        {
-                            "label": "[concat('', '[resourceGroup().location]')]",
-                            "value": "[concat('', '[resourceGroup().location]')]"
-                        }
-                    ]
-                },
-                "visible": true
-            }
-		],
+        "basics": [],
         "steps": [
 			{
 				"name": "webAppConfig",
@@ -166,42 +65,21 @@
                 },
                 "bladeTitle": "Database Settings",
                 "elements": [
-            		{
-            		    "name": "databaseUser",
-            		    "type": "Microsoft.Common.TextBox",
-            		    "label": "Database User",
-            		    "defaultValue": "clevvapro",
-            		    "toolTip": "Name of the database user.",
-            		    "constraints": {
-            		        "required": false,
-                            "regex": "^[a-z0-9A-Z]{4,30}$",
-                            "validationMessage": "Only alphanumeric characters are allowed, and the value must be 4-30 characters long."
-            		    },
-            		    "visible": true
-            		},
-            		{
-            		    "name": "databasePassword",
-            		    "type": "Microsoft.Common.PasswordBox",
-            		    "label": {
-            		        "password": "Database Password",
-            		        "confirmPassword": "Confirm password"
-            		    },
-            		    "toolTip": "Password of the database user.",
-            		    "constraints": {
-            		        "required": true,
-                            "regex": "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[\\w~@#$%^&*+=|{}:;!.?\\()\\[\\]-]{12,}$",
-                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase, 1 lowercase and 1 number."
-            		    },
-            		    "options": {
-            		        "hideConfirmation": false
-            		    },
-            		    "visible": true
-            		},
+					{
+						"name": "databaseInfoBox",
+						"type": "Microsoft.Common.InfoBox",
+						"visible": true,
+						"options": {
+							"icon": "Info",
+							"text": "Entry Level: 4vCPU, 100GB Storage\n\nMid Level: 16vCPU, 100GB Storage\n\nEnterprise: 64vCPU, 100GB Storage"
+						}
+					},
             		{
             		    "name": "databaseResources",
             		    "type": "Microsoft.Common.DropDown",
             		    "label": "Database Resources",
-            		    "toolTip": "Entry Level: 4vCPU; Mid Level: 16vCPU; Enterprise: 64vCPU",
+            		    "toolTip": "Entry Level: 4vCPU Mid Level: 16vCPU Enterprise: 64vCPU",
+						"defaultValue": "Entry Level Speed",
             		    "constraints": {
             		        "required": true,
             		        "allowedValues": [
@@ -227,8 +105,6 @@
         "outputs": {
 			"webAppName": "[steps('webAppConfig').webAppName.name]",
             "ManualUpdate": "[steps('webAppConfig').manualUpdate]",
-            "DatabaseUser": "[steps('dbConfig').databaseUser]",
-			"DatabasePassword": "[steps('dbConfig').databasePassword]",
 			"DatabaseResources": "[steps('dbConfig').databaseResources]",
             "location": "[basics('location')]"
         }
