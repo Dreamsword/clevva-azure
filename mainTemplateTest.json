@@ -9,17 +9,23 @@
                 "description": "Base name of the resource such as Clevva-Web-App."
             },
             "minLength": 3
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+              "description": "Location for all resources."
+              }
         }
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "locationName": ["resourceGroup().location"]
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2020-06-01",
             "name": "[variables('appServicePlanName')]",
-            "location": "[variables('locationName')]",
+            "location": "[parameters('location')]",
             "sku": {
                 "Tier": "Standard",
                 "Name": "S1"
@@ -30,24 +36,6 @@
                 "workerSizeId": "1",
                 "reserved": true,
                 "numberOfWorkers": "1"
-            }
-        },
-        {
-            "type": "Microsoft.Web/customApis",
-            "apiVersion": "2016-06-01",
-            "name": "Account_Creation",
-            "location": "[variables('locationName')]",
-            "properties": {
-                "connectionParameters": {
-                    "apikey": "j1065753a0e391dfb584963b25c1e987",
-                    "Content-Type": "application/json"
-                },
-                "description": "API call to a Clevva server to register this account",
-                "displayName": "Clevva Account",
-                "apiType": "Rest",
-                "backendService": {
-                    "serviceUrl": "https://digiblu.clevva.com/api/va/start"
-                }
             }
         }
     ]
