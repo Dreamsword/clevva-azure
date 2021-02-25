@@ -56,6 +56,23 @@
                     "serviceUrl": "https://digiblu.clevva.com/api/va/start"
                 }
             }
+        },
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "API",
+            "location": "[parameters('location')]",
+            "kind": "AzureCLI",
+            "properties": {
+                "azCliVersion": "2.0.80",
+                "forceUpdateTag": "1",
+                "azPowerShellVersion": "3.0",
+                "arguments": "",
+                "primaryScriptUri": "https://raw.githubusercontent.com/Dreamsword/clevva-azure/master/scripts/deploymentScript.sh",
+                "timeout": "PT5M",
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D"
+            }
         }
     ]
 }
