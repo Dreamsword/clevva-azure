@@ -13,7 +13,7 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "locationName": ["location()"]
+        "locationName": ["resourceGroup().location"]
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
@@ -34,7 +34,7 @@
         },
         {
             "type": "Microsoft.Web/customApis",
-            "apiVersion": "2018-07-01-preview",
+            "apiVersion": "2016-06-01",
             "name": "Account_Creation",
             "location": "[variables('locationName')]",
             "properties": {
