@@ -13,7 +13,7 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "locationName": ["location()"],
+        "locationName": ["location()"]
     },
     "resources": [{
             "type": "Microsoft.Web/serverfarms",
