@@ -21,7 +21,8 @@
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
     },
-    "resources": [{
+    "resources": [
+        {
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2020-06-01",
             "name": "[variables('appServicePlanName')]",
@@ -36,6 +37,66 @@
                 "workerSizeId": "1",
                 "reserved": true,
                 "numberOfWorkers": "1"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('webAppName')]",
+            "location": "[parameters('location')]",
+            "kind": "app,linux",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+            ],
+            "properties": {
+                "enabled": true,
+                "httpsOnly": true,
+                "reserved": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[variables('linuxFxVersion')]",
+                    "appSettings": [{
+                            "name": "DB_HOST",
+                            "value": "[concat(variables('databasePortalName'), '.mysql.database.azure.com')]"
+                        },
+                        {
+                            "name": "DB_USER",
+                            "value": "[variables('databaseUsername')]"
+                        },
+                        {
+                            "name": "DB_PASS",
+                            "value": "[variables('databasePassword')]"
+                        },
+                        {
+                            "name": "DB_NAME",
+                            "value": "clevva"
+                        },
+                        {
+                            "name": "CLEVVA_VERSION",
+                            "value": "[outputs('tag')]"
+                        },
+                        {
+                            "name": "IS_HTTPS",
+                            "value": "true"
+                        },
+                        {
+                            "name": "MYSQL_ATTR_SSL_CA",
+                            "value": "/home/site/wwwroot/BaltimoreCyberTrustRoot.crt.pem"
+                        },
+                        {
+                            "name": "SCM_COMMAND_IDLE_TIMEOUT",
+                            "value": "1800"
+                        },
+                        {
+                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                            "value": "false"
+                        },
+                        {
+                            "name": "SCM_ENABLE_DYNAMIC_INSTALL",
+                            "value": "false"
+                        }
+                    ]
+                }
             }
         }
     ]
