@@ -111,10 +111,6 @@
                             "value": "clevva"
                         },
                         {
-                            "name": "CLEVVA_VERSION",
-                            "value": "[outputs('tag')]"
-                        },
-                        {
                             "name": "IS_HTTPS",
                             "value": "true"
                         },
