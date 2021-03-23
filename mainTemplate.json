@@ -533,7 +533,7 @@
                 "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
             ],
             "properties": {
-                "originHostHeader": "[concat(parameters('webAppName'), '.azurewebsites.net)']",
+                "originHostHeader": "[concat(parameters('webAppName'), '.azurewebsites.net')]",
                 "contentTypesToCompress": [
                     "application/eot",
                     "application/font",
