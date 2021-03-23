@@ -520,14 +520,14 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints",
             "apiVersion": "2020-09-01",
-            "name": "[concat(variables('cdnName'), '/', parameters('webAppName'))]",
+            "name": "[concat(variables('cdnName'), '/', clevva)]",
             "location": "Global",
             "dependsOn": [
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
-                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
+                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), clevva, 'clevva-azurewebsites-net')]"
             ],
             "properties": {
-                "originHostHeader": "[concat(parameters('webAppName'), '.azurewebsites.net')]",
+                "originHostHeader": "clevva.azurewebsites.net",
                 "contentTypesToCompress": [
                     "application/eot",
                     "application/font",
@@ -578,10 +578,10 @@
                 "optimizationType": "GeneralWebDelivery",
                 "origins": [
                     {
-                        "name": "[concat(parameters('webAppName'), '-azurewebsites-net')]",
+                        "name": "clevva-azurewebsites-net'",
                         "properties": {
-                            "hostName": "[concat(parameters('webAppName'), '.azurewebsites.net')]",
-                            "originHostHeader": "[concat(parameters('webAppName'), '.azurewebsites.net')]",
+                            "hostName": "clevva.azurewebsites.net",
+                            "originHostHeader": "clevva.azurewebsites.net",
                             "priority": 1,
                             "weight": 1000,
                             "enabled": true
@@ -594,7 +594,7 @@
                         "properties": {
                             "origins": [
                                 {
-                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
+                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'clevva', 'clevva-azurewebsites-net')]"
                                 }
                             ]
                         }
@@ -605,14 +605,14 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/origins",
             "apiVersion": "2020-09-01",
-            "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'), '-azurewebsites-net')]",
+            "name": "[concat(variables('cdnName'), '/', clevva, '/', 'clevva-azurewebsites-net')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('webAppName'))]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'clevva')]",
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
-                "hostName": "[concat(parameters('webAppName'), '-azurewebsites-net')]",
-                "originHostHeader": "[concat(parameters('webAppName'), '-azurewebsites-net')]",
+                "hostName": "clevva-azurewebsites-net",
+                "originHostHeader": "clevva-azurewebsites-net",
                 "priority": 1,
                 "weight": 1000,
                 "enabled": true
@@ -621,16 +621,16 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/originGroups",
             "apiVersion": "2020-09-01",
-            "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'))]",
+            "name": "[concat(variables('cdnName'), '/clevva/', 'clevva'",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('webAppName'))]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'clevva)]",
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
-                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
+                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'clevva', 'clevva-azurewebsites-net')]"
             ],
             "properties": {
                 "origins": [
                     {
-                        "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
+                        "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'clevva', 'clevva-azurewebsites-net')]"
                     }
                 ]
             }
