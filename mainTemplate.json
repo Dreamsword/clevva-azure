@@ -600,7 +600,7 @@
                         "properties": {
                             "origins": [
                                 {
-                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'parameters('webAppName')', parameters('webAppName'), '-azurewebsites-net')]"
+                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), parameters('webAppName'), parameters('webAppName'), '-azurewebsites-net')]"
                                 }
                             ]
                         }
