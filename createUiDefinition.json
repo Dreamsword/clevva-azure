@@ -40,7 +40,7 @@
                 		"defaultValue": "true",
                 		"toolTip": "Set to false if you would like the Clevva software to update automatically",
                 		"constraints": {
-                		    "required": false,
+                		    "required": true,
                 		    "allowedValues": [
                 		        {
                 		            "label": "true",

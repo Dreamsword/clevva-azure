@@ -205,7 +205,7 @@
             "kind": "app,linux",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-                "[resourceId(Microsoft.Storage/storageAccounts, variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
             ],
             "properties": {
                 "enabled": true,
