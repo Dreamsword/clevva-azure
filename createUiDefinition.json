@@ -37,7 +37,6 @@
                 		"name": "manualUpdate",
                 		"type": "Microsoft.Common.DropDown",
                 		"label": "Manual Update",
-                		"defaultValue": "",
                 		"toolTip": "Set to false if you would like the Clevva software to update automatically",
                 		"constraints": {
                 		    "required": true,

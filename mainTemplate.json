@@ -4,7 +4,6 @@
     "parameters": {
         "ManualUpdate": {
             "type": "bool",
-            "defaultValue": "true",
             "metadata": {
                 "description": "Set to false if you would like the Clevva software to update automatically"
             }
@@ -613,7 +612,7 @@
             "apiVersion": "2020-09-01",
             "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'), '-azurewebsites-net')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'parameters('webAppName'))]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('webAppName'))]",
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
