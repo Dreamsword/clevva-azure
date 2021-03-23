@@ -53,6 +53,27 @@
                 		    ]
                 		},
                 		"visible": true
+            		},
+					{
+                		"name": "enableCDN",
+                		"type": "Microsoft.Common.DropDown",
+                		"label": "Enable CDN",
+                		"defaultValue": "true",
+                		"toolTip": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness",
+                		"constraints": {
+                		    "required": false,
+                		    "allowedValues": [
+                		        {
+                		            "label": "true",
+                		            "value": true
+                		        },
+                		        {
+                		            "label": "false",
+                		            "value": false
+                		        }
+                		    ]
+                		},
+                		"visible": true
             		}
 				]
 			},
@@ -105,8 +126,9 @@
         "outputs": {
 			"webAppName": "[steps('webAppConfig').webAppName.name]",
             "ManualUpdate": "[steps('webAppConfig').manualUpdate]",
+			"cdn": "[steps('webAppConfig').enableCDN]",
 			"DatabaseResources": "[steps('dbConfig').databaseResources]",
-            "location": "[basics('location')]"
+            "location": "[location()]"
         }
     }
 }
