@@ -57,10 +57,9 @@
                 		"name": "enableCDN",
                 		"type": "Microsoft.Common.DropDown",
                 		"label": "Enable CDN",
-                		"defaultValue": "true",
                 		"toolTip": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness",
                 		"constraints": {
-                		    "required": false,
+                		    "required": true,
                 		    "allowedValues": [
                 		        {
                 		            "label": "true",

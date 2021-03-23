@@ -30,11 +30,6 @@
         },
         "cdn": {
             "type": "bool",
-            "defaultValue": "true",
-            "allowedValues": [
-                "true",
-                "false"
-            ],
             "metadata": {
                 "description": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness."
             }
