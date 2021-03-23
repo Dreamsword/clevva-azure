@@ -625,7 +625,7 @@
             }
         },
         {
-            "type": "Microsoft.Cdn/profiles/endpoints/origingroups",
+            "type": "Microsoft.Cdn/profiles/endpoints/originGroups",
             "apiVersion": "2020-09-01",
             "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'))]",
             "dependsOn": [
