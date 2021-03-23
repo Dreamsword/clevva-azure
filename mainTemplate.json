@@ -613,7 +613,7 @@
             "apiVersion": "2020-09-01",
             "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'), '-azurewebsites-net')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'parameters('webAppName')')]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'parameters('webAppName'))]",
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
@@ -627,7 +627,7 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/origingroups",
             "apiVersion": "2020-09-01",
-            "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName')')]",
+            "name": "[concat(variables('cdnName'), '/', parameters('webAppName'), '/', parameters('webAppName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), parameters('webAppName'))]",
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
