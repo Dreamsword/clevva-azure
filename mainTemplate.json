@@ -523,7 +523,7 @@
             "name": "[concat(variables('cdnName'), '/clevva')]",
             "location": "Global",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
+                "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
                 "originHostHeader": "clevva.azurewebsites.net",
