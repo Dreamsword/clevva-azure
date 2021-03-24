@@ -72,17 +72,14 @@
             "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "P1v3",
                 "tier": "PremiumV3",
-                "size": "P1v3",
-                "family": "Pv3",
-                "capacity": 1
+                "name": "P1v3"
             },
             "kind": "linux",
             "properties": {
                 "name": "[variables('appServicePlanName')]",
-                "reserved": true,
                 "workerSizeId": "1",
+                "reserved": true,
                 "numberOfWorkers": "1"
             }
         },
