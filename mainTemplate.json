@@ -44,7 +44,7 @@
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
         "branch": "master",
-        "cdnName": "Clevva",
+        "cdnName": "ClevvaCDN",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('C', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'a', '!')]",
