@@ -85,7 +85,9 @@
                 "isSpot": false,
                 "reserved": true,
                 "isXenon": false,
-                "hyperV": false
+                "hyperV": false,
+                "workerSizeId": "1",
+                "numberOfWorkers": "1"
             }
         },
         {
