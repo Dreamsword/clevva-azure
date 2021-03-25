@@ -37,7 +37,7 @@
             "defaultValue": "clevvacontent",
             "metadata": {
                 "description": "Name of the storage account you would like to create"
-            },
+            }
         },
         "userPassword": {
             "type": "securestring",
