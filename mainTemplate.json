@@ -38,7 +38,6 @@
             "metadata": {
                 "description": "Name of the storage account you would like to create"
             },
-            "minLenght": 3
         },
         "userPassword": {
             "type": "securestring",
