@@ -90,7 +90,7 @@
             "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "P1v3",
+                "name": "P1v3"
             },
             "kind": "linux",
             "properties": {
