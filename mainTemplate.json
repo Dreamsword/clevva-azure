@@ -91,21 +91,10 @@
             "location": "[parameters('location')]",
             "sku": {
                 "name": "P1v3",
-                "tier": "PremiumV3",
-                "size": "P1v3",
-                "family": "Pv3",
-                "capacity": 1
             },
             "kind": "linux",
             "properties": {
-                "perSiteScaling": false,
-                "maximumElasticWorkerCount": 1,
-                "isSpot": false,
-                "reserved": true,
-                "isXenon": false,
-                "hyperV": false,
-                "targetWorkerCount": 0,
-                "targetWorkerSizeId": 0
+                "reserved": true
             }
         },
         {
@@ -316,7 +305,7 @@
                 "azureStorageAccounts": {
                     "clevvacontent": {
                         "type": "AzureFiles",
-                        "accountName": "clevvacontent",
+                        "accountName": "[parameters('storageAccount')]",
                         "shareName": "clevvacontent",
                         "mountPath": "/clevva"
                     }
