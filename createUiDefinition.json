@@ -27,7 +27,7 @@
 						"toolTip": "Enter an email address to be used to login to the App",
 						"constraints": {
 							"required": true,
-							"regex": "^[w-.]+@([w-]+.)+[w-]{2,4}$",
+							"regex": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
 							"validationMessage": "A valid email address is required"
 						},
             		    "visible": true
