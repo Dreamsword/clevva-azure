@@ -112,7 +112,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2020-08-01-preview",
-            "name": "[variables('storageAccount')]",
+            "name": "[parameters('storageAccount')]",
             "location": "[parameters('location')]",
             "sku": {
                 "name": "Standard_RAGRS",
@@ -147,9 +147,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices",
             "apiVersion": "2020-08-01-preview",
-            "name": "[concat(variables('storageAccount'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "sku": {
                 "name": "Standard_RAGRS",
@@ -164,9 +164,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices",
             "apiVersion": "2020-08-01-preview",
-            "name": "[concat(variables('storageAccount'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "sku": {
                 "name": "Standard_RAGRS",
@@ -182,26 +182,26 @@
         {
             "type": "Microsoft.Storage/storageAccounts/queueServices",
             "apiVersion": "2020-08-01-preview",
-            "name": "[concat(variables('storageAccount'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ]
         },
         {
             "type": "Microsoft.Storage/storageAccounts/tableServices",
             "apiVersion": "2020-08-01-preview",
-            "name": "[concat(variables('storageAccount'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ]
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2020-08-01-preview",
-            "name": "[concat(variables('storageAccount'), '/default/', variables('storageAccount'))]",
+            "name": "[concat(parameters('storageAccount'), '/default/', parameters('storageAccount'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccount'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccount'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "properties": {
                 "accessTier": "TransactionOptimized",
@@ -217,7 +217,7 @@
             "kind": "app,linux",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "properties": {
                 "enabled": true,
