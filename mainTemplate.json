@@ -2,13 +2,13 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
     "parameters": {
-        "ManualUpdate": {
+        "cdn": {
             "type": "bool",
             "metadata": {
-                "description": "Set to false if you would like the Clevva software to update automatically"
+                "description": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness."
             }
         },
-        "DatabaseResources": {
+        "databaseResources": {
             "type": "string",
             "allowedValues": [
                 "GP_Gen5_4",
@@ -20,6 +20,30 @@
                 "description": "The speed of the database (the number depects the number of vCPU's)."
             }
         },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "manualUpdate": {
+            "type": "bool",
+            "metadata": {
+                "description": "Set to false if you would like the Clevva software to update automatically"
+            }
+        },
+        "userPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Password for the user"
+            }
+        },
+        "userName": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter an email address to be used to login to the App"
+            }
+        },
         "webAppName": {
             "type": "string",
             "defaultValue": "Clevva-Web-App",
@@ -27,18 +51,6 @@
                 "description": "Base name of the resource such as Clevva-Web-App."
             },
             "minLength": 3
-        },
-        "cdn": {
-            "type": "bool",
-            "metadata": {
-                "description": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness."
-            }
-        },
-        "location": {
-            "type": "string",
-            "metadata": {
-                "description": "Location for all resources."
-            }
         }
     },
     "variables": {
@@ -68,19 +80,26 @@
         },
         {
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2018-02-01",
             "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
+                "name": "P1v3",
                 "tier": "PremiumV3",
-                "name": "P1v3"
+                "size": "P1v3",
+                "family": "Pv3",
+                "capacity": 1
             },
             "kind": "linux",
             "properties": {
-                "name": "[variables('appServicePlanName')]",
-                "workerSizeId": "1",
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
                 "reserved": true,
-                "numberOfWorkers": "1"
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
             }
         },
         {
@@ -216,6 +235,14 @@
                         {
                             "name": "DB_NAME",
                             "value": "clevva"
+                        },
+                        {
+                            "name": "USER_NAME",
+                            "value": "[parameters('userName')]"
+                        },
+                        {
+                            "name": "USER_PASS",
+                            "value": "[parameters('userPassword')]"
                         },
                         {
                             "name": "IS_HTTPS",
