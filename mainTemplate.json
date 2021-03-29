@@ -95,7 +95,7 @@
             "location": "[parameters('location')]",
             "kind": "app,linux",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
             ],
             "properties": {
                 "enabled": true,
@@ -515,7 +515,7 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/originGroups",
             "apiVersion": "2020-09-01",
-            "name": "[concat(variables('cdnName'), '/clevva/', 'clevva'",
+            "name": "[concat(variables('cdnName'), '/clevva/', 'clevva')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
                 "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'clevva')]",
