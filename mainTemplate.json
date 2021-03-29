@@ -2,33 +2,80 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "profiles_Clevva_name": {
-            "defaultValue": "Clevva",
-            "type": "String"
+        "cdn": {
+            "type": "bool",
+            "metadata": {
+                "description": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness."
+            }
         },
-        "sites_BluePrism_name": {
-            "defaultValue": "BluePrism",
-            "type": "String"
+        "databaseResources": {
+            "type": "string",
+            "allowedValues": [
+                "GP_Gen5_4",
+                "GP_Gen5_16",
+                "GP_Gen5_64"
+            ],
+            "defaultValue": "GP_Gen5_4",
+            "metadata": {
+                "description": "The speed of the database (the number depects the number of vCPU's)."
+            }
         },
-        "serverfarms_ASP_BluePrism_bad4_name": {
-            "defaultValue": "ASP-BluePrism-bad4",
-            "type": "String"
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
         },
-        "servers_blueprism_database_name": {
-            "defaultValue": "blueprism-database",
-            "type": "String"
+        "manualUpdate": {
+            "type": "bool",
+            "metadata": {
+                "description": "Set to false if you would like the Clevva software to update automatically"
+            }
         },
-        "storageAccounts_clevvacontent_name": {
+        "storageAccount": {
+            "type": "string",
             "defaultValue": "clevvacontent",
-            "type": "String"
+            "metadata": {
+                "description": "Name of the storage account you would like to create"
+            }
+        },
+        "userPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the user"
+            }
+        },
+        "userName": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter an email address to be used to login to the App"
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "Clevva-Web-App",
+            "metadata": {
+                "description": "Base name of the resource such as Clevva-Web-App."
+            },
+            "minLength": 3
         }
     },
-    "variables": {},
+    "variables": {
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
+        "branch": "master",
+        "cdnName": "ClevvaCDN",
+        "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
+        "databaseUsername": "clevvapro",
+        "databasePassword": "[concat('C', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'a', '!')]",
+        "linuxFxVersion": "php|7.4",
+        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git"
+    },
     "resources": [
         {
+            "condition": "[equals(parameters('cdn'),'true')]",
             "type": "Microsoft.Cdn/profiles",
             "apiVersion": "2020-09-01",
-            "name": "[parameters('profiles_Clevva_name')]",
+            "name": "[variables('cdnName')]",
             "location": "Global",
             "sku": {
                 "name": "Standard_Microsoft"
@@ -39,7 +86,7 @@
         {
             "type": "Microsoft.DBforMySQL/servers",
             "apiVersion": "2017-12-01",
-            "name": "[parameters('servers_blueprism_database_name')]",
+            "name": "[variables('databasePortalName')]",
             "location": "uksouth",
             "sku": {
                 "name": "GP_Gen5_4",
@@ -64,7 +111,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2021-01-01",
-            "name": "[parameters('storageAccounts_clevvacontent_name')]",
+            "name": "[parameters('storageAccount')]",
             "location": "uksouth",
             "sku": {
                 "name": "Standard_RAGRS",
@@ -101,8 +148,8 @@
         {
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2018-02-01",
-            "name": "[parameters('serverfarms_ASP_BluePrism_bad4_name')]",
-            "location": "UK South",
+            "name": "[variables('appServicePlanName')]",
+            "location": "[parameters('location')]",
             "sku": {
                 "name": "P1v3",
                 "tier": "PremiumV3",
@@ -125,9 +172,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/audit_log_enabled')]",
+            "name": "[concat(variables('databasePortalName'), '/audit_log_enabled')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -137,9 +184,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/audit_log_events')]",
+            "name": "[concat(variables('databasePortalName'), '/audit_log_events')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "CONNECTION",
@@ -149,9 +196,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/audit_log_exclude_users')]",
+            "name": "[concat(variables('databasePortalName'), '/audit_log_exclude_users')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "azure_superuser",
@@ -161,9 +208,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/audit_log_include_users')]",
+            "name": "[concat(variables('databasePortalName'), '/audit_log_include_users')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "source": "system-default"
@@ -172,21 +219,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/auto_increment_increment')]",
+            "name": "[concat(variables('databasePortalName'), '/auto_increment_increment')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
-            ],
-            "properties": {
-                "value": "1",
-                "source": "system-default"
-            }
-        },
-        {
-            "type": "Microsoft.DBforMySQL/servers/configurations",
-            "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/auto_increment_offset')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -196,9 +231,21 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/binlog_expire_logs_seconds')]",
+            "name": "[concat(variables('databasePortalName'), '/auto_increment_offset')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(variables('databasePortalName'), '/binlog_expire_logs_seconds')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -208,9 +255,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/binlog_group_commit_sync_delay')]",
+            "name": "[concat(variables('databasePortalName'), '/binlog_group_commit_sync_delay')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -220,9 +267,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/binlog_group_commit_sync_no_delay_count')]",
+            "name": "[concat(variables('databasePortalName'), '/binlog_group_commit_sync_no_delay_count')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -232,9 +279,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/binlog_row_image')]",
+            "name": "[concat(variables('databasePortalName'), '/binlog_row_image')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "minimal",
@@ -244,9 +291,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/binlog_sum_size_for_stop_pct_max')]",
+            "name": "[concat(variables('databasePortalName'), '/binlog_sum_size_for_stop_pct_max')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "30",
@@ -256,9 +303,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/character_set_server')]",
+            "name": "[concat(variables('databasePortalName'), '/character_set_server')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "UTF8MB4",
@@ -268,9 +315,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/collation_server')]",
+            "name": "[concat(variables('databasePortalName'), '/collation_server')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "UTF8MB4_BIN",
@@ -280,9 +327,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/connect_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/connect_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10",
@@ -292,9 +339,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/default_week_format')]",
+            "name": "[concat(variables('databasePortalName'), '/default_week_format')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -304,9 +351,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/div_precision_increment')]",
+            "name": "[concat(variables('databasePortalName'), '/div_precision_increment')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4",
@@ -316,9 +363,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/enforce_gtid_consistency')]",
+            "name": "[concat(variables('databasePortalName'), '/enforce_gtid_consistency')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -328,9 +375,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/eq_range_index_dive_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/eq_range_index_dive_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "200",
@@ -340,9 +387,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/event_scheduler')]",
+            "name": "[concat(variables('databasePortalName'), '/event_scheduler')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -352,9 +399,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/explicit_defaults_for_timestamp')]",
+            "name": "[concat(variables('databasePortalName'), '/explicit_defaults_for_timestamp')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -364,9 +411,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/flush_time')]",
+            "name": "[concat(variables('databasePortalName'), '/flush_time')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -376,9 +423,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/ft_query_expansion_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/ft_query_expansion_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "20",
@@ -388,9 +435,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/group_concat_max_len')]",
+            "name": "[concat(variables('databasePortalName'), '/group_concat_max_len')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1024",
@@ -400,9 +447,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/gtid_mode')]",
+            "name": "[concat(variables('databasePortalName'), '/gtid_mode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -412,9 +459,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/init_connect')]",
+            "name": "[concat(variables('databasePortalName'), '/init_connect')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "source": "system-default"
@@ -423,9 +470,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_adaptive_flushing')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_adaptive_flushing')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -435,9 +482,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_adaptive_flushing_lwm')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_adaptive_flushing_lwm')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10",
@@ -447,9 +494,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_adaptive_hash_index')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_adaptive_hash_index')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -459,9 +506,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_adaptive_hash_index_parts')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_adaptive_hash_index_parts')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8",
@@ -471,9 +518,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_adaptive_max_sleep_delay')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_adaptive_max_sleep_delay')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "150000",
@@ -483,9 +530,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_autoextend_increment')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_autoextend_increment')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "64",
@@ -495,9 +542,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_autoinc_lock_mode')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_autoinc_lock_mode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -507,9 +554,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_buffer_pool_dump_at_shutdown')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_buffer_pool_dump_at_shutdown')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -519,9 +566,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_buffer_pool_dump_pct')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_buffer_pool_dump_pct')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "25",
@@ -531,9 +578,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_buffer_pool_load_at_startup')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_buffer_pool_load_at_startup')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -543,9 +590,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_buffer_pool_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_buffer_pool_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "16106127360",
@@ -555,9 +602,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_change_buffer_max_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_change_buffer_max_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "25",
@@ -567,9 +614,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_change_buffering')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_change_buffering')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "all",
@@ -579,9 +626,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_cmp_per_index_enabled')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_cmp_per_index_enabled')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -591,9 +638,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_commit_concurrency')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_commit_concurrency')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -603,9 +650,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_compression_failure_threshold_pct')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_compression_failure_threshold_pct')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "5",
@@ -615,9 +662,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_compression_level')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_compression_level')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "6",
@@ -627,9 +674,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_compression_pad_pct_max')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_compression_pad_pct_max')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "50",
@@ -639,9 +686,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_concurrency_tickets')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_concurrency_tickets')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "5000",
@@ -651,9 +698,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_deadlock_detect')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_deadlock_detect')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -663,9 +710,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_default_row_format')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_default_row_format')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "DYNAMIC",
@@ -675,9 +722,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_file_format')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_file_format')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "Barracuda",
@@ -687,9 +734,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_file_per_table')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_file_per_table')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -699,9 +746,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_fill_factor')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_fill_factor')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "100",
@@ -711,9 +758,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_cache_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_cache_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8000000",
@@ -723,9 +770,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_enable_stopword')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_enable_stopword')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -735,9 +782,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_max_token_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_max_token_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "84",
@@ -747,9 +794,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_min_token_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_min_token_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "3",
@@ -759,9 +806,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_num_word_optimize')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_num_word_optimize')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "2000",
@@ -771,9 +818,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_result_cache_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_result_cache_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "2000000000",
@@ -783,9 +830,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_sort_pll_degree')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_sort_pll_degree')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "2",
@@ -795,9 +842,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_ft_total_cache_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_ft_total_cache_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "640000000",
@@ -807,9 +854,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_io_capacity')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_io_capacity')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "200",
@@ -819,9 +866,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_io_capacity_max')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_io_capacity_max')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "2000",
@@ -831,9 +878,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_large_prefix')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_large_prefix')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -843,9 +890,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_lock_wait_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_lock_wait_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "50",
@@ -855,9 +902,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_log_compressed_pages')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_log_compressed_pages')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -867,9 +914,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_lru_scan_depth')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_lru_scan_depth')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1024",
@@ -879,9 +926,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_max_dirty_pages_pct')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_max_dirty_pages_pct')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "75",
@@ -891,9 +938,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_max_dirty_pages_pct_lwm')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_max_dirty_pages_pct_lwm')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -903,9 +950,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_max_purge_lag')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_max_purge_lag')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -915,9 +962,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_max_purge_lag_delay')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_max_purge_lag_delay')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -927,9 +974,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_old_blocks_pct')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_old_blocks_pct')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "37",
@@ -939,9 +986,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_old_blocks_time')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_old_blocks_time')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1000",
@@ -951,9 +998,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_online_alter_log_max_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_online_alter_log_max_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "134217728",
@@ -963,9 +1010,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_optimize_fulltext_only')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_optimize_fulltext_only')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -975,9 +1022,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_page_cleaners')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_page_cleaners')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4",
@@ -987,9 +1034,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_purge_batch_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_purge_batch_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "300",
@@ -999,9 +1046,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_purge_rseg_truncate_frequency')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_purge_rseg_truncate_frequency')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "128",
@@ -1011,9 +1058,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_purge_threads')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_purge_threads')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4",
@@ -1023,9 +1070,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_random_read_ahead')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_random_read_ahead')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1035,9 +1082,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_read_ahead_threshold')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_read_ahead_threshold')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "56",
@@ -1047,9 +1094,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_read_io_threads')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_read_io_threads')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4",
@@ -1059,9 +1106,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_rollback_segments')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_rollback_segments')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "128",
@@ -1071,9 +1118,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_auto_recalc')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_auto_recalc')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1083,9 +1130,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_include_delete_marked')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_include_delete_marked')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1095,9 +1142,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_method')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_method')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "nulls_equal",
@@ -1107,9 +1154,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_on_metadata')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_on_metadata')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1119,9 +1166,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_persistent')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_persistent')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1131,9 +1178,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_persistent_sample_pages')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_persistent_sample_pages')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "20",
@@ -1143,9 +1190,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_stats_transient_sample_pages')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_stats_transient_sample_pages')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8",
@@ -1155,9 +1202,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_sync_array_size')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_sync_array_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -1167,9 +1214,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_table_locks')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_table_locks')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1179,9 +1226,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_thread_concurrency')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_thread_concurrency')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1191,9 +1238,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_thread_sleep_delay')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_thread_sleep_delay')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10000",
@@ -1203,9 +1250,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/innodb_write_io_threads')]",
+            "name": "[concat(variables('databasePortalName'), '/innodb_write_io_threads')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4",
@@ -1215,9 +1262,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/interactive_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/interactive_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "28800",
@@ -1227,9 +1274,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/join_buffer_size')]",
+            "name": "[concat(variables('databasePortalName'), '/join_buffer_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "262144",
@@ -1239,9 +1286,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/local_infile')]",
+            "name": "[concat(variables('databasePortalName'), '/local_infile')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1251,9 +1298,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/lock_wait_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/lock_wait_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "31536000",
@@ -1263,9 +1310,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_bin_trust_function_creators')]",
+            "name": "[concat(variables('databasePortalName'), '/log_bin_trust_function_creators')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1275,9 +1322,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_output')]",
+            "name": "[concat(variables('databasePortalName'), '/log_output')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "FILE",
@@ -1287,9 +1334,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_queries_not_using_indexes')]",
+            "name": "[concat(variables('databasePortalName'), '/log_queries_not_using_indexes')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1299,9 +1346,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_slow_admin_statements')]",
+            "name": "[concat(variables('databasePortalName'), '/log_slow_admin_statements')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1311,9 +1358,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_slow_slave_statements')]",
+            "name": "[concat(variables('databasePortalName'), '/log_slow_slave_statements')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1323,9 +1370,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/log_throttle_queries_not_using_indexes')]",
+            "name": "[concat(variables('databasePortalName'), '/log_throttle_queries_not_using_indexes')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1335,9 +1382,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/long_query_time')]",
+            "name": "[concat(variables('databasePortalName'), '/long_query_time')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10",
@@ -1347,9 +1394,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/lower_case_table_names')]",
+            "name": "[concat(variables('databasePortalName'), '/lower_case_table_names')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -1359,9 +1406,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_allowed_packet')]",
+            "name": "[concat(variables('databasePortalName'), '/max_allowed_packet')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "536870912",
@@ -1371,9 +1418,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_connect_errors')]",
+            "name": "[concat(variables('databasePortalName'), '/max_connect_errors')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "100",
@@ -1383,9 +1430,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_connections')]",
+            "name": "[concat(variables('databasePortalName'), '/max_connections')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "625",
@@ -1395,9 +1442,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_digest_length')]",
+            "name": "[concat(variables('databasePortalName'), '/max_digest_length')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1024",
@@ -1407,9 +1454,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_error_count')]",
+            "name": "[concat(variables('databasePortalName'), '/max_error_count')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "64",
@@ -1419,9 +1466,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_execution_time')]",
+            "name": "[concat(variables('databasePortalName'), '/max_execution_time')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1431,9 +1478,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_heap_table_size')]",
+            "name": "[concat(variables('databasePortalName'), '/max_heap_table_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "16777216",
@@ -1443,9 +1490,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_join_size')]",
+            "name": "[concat(variables('databasePortalName'), '/max_join_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "18446744073709551615",
@@ -1455,9 +1502,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_length_for_sort_data')]",
+            "name": "[concat(variables('databasePortalName'), '/max_length_for_sort_data')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1024",
@@ -1467,9 +1514,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_points_in_geometry')]",
+            "name": "[concat(variables('databasePortalName'), '/max_points_in_geometry')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "65536",
@@ -1479,9 +1526,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_prepared_stmt_count')]",
+            "name": "[concat(variables('databasePortalName'), '/max_prepared_stmt_count')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "16382",
@@ -1491,9 +1538,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_seeks_for_key')]",
+            "name": "[concat(variables('databasePortalName'), '/max_seeks_for_key')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4294967295",
@@ -1503,9 +1550,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_sort_length')]",
+            "name": "[concat(variables('databasePortalName'), '/max_sort_length')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1024",
@@ -1515,9 +1562,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_sp_recursion_depth')]",
+            "name": "[concat(variables('databasePortalName'), '/max_sp_recursion_depth')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1527,9 +1574,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_user_connections')]",
+            "name": "[concat(variables('databasePortalName'), '/max_user_connections')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1539,9 +1586,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/max_write_lock_count')]",
+            "name": "[concat(variables('databasePortalName'), '/max_write_lock_count')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4294967295",
@@ -1551,9 +1598,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/min_examined_row_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/min_examined_row_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1563,9 +1610,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/net_buffer_length')]",
+            "name": "[concat(variables('databasePortalName'), '/net_buffer_length')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "16384",
@@ -1575,9 +1622,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/net_read_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/net_read_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "120",
@@ -1587,9 +1634,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/net_retry_count')]",
+            "name": "[concat(variables('databasePortalName'), '/net_retry_count')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10",
@@ -1599,9 +1646,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/net_write_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/net_write_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "240",
@@ -1611,9 +1658,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/ngram_token_size')]",
+            "name": "[concat(variables('databasePortalName'), '/ngram_token_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "2",
@@ -1623,9 +1670,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/optimizer_prune_level')]",
+            "name": "[concat(variables('databasePortalName'), '/optimizer_prune_level')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -1635,9 +1682,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/optimizer_search_depth')]",
+            "name": "[concat(variables('databasePortalName'), '/optimizer_search_depth')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "62",
@@ -1647,9 +1694,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/optimizer_switch')]",
+            "name": "[concat(variables('databasePortalName'), '/optimizer_switch')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "default",
@@ -1659,9 +1706,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/parser_max_mem_size')]",
+            "name": "[concat(variables('databasePortalName'), '/parser_max_mem_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "18446744073709551615",
@@ -1671,9 +1718,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/performance_schema')]",
+            "name": "[concat(variables('databasePortalName'), '/performance_schema')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1683,9 +1730,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/preload_buffer_size')]",
+            "name": "[concat(variables('databasePortalName'), '/preload_buffer_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "32768",
@@ -1695,9 +1742,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_cache_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/query_cache_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1048576",
@@ -1707,9 +1754,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_cache_min_res_unit')]",
+            "name": "[concat(variables('databasePortalName'), '/query_cache_min_res_unit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4096",
@@ -1719,9 +1766,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_cache_size')]",
+            "name": "[concat(variables('databasePortalName'), '/query_cache_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "0",
@@ -1731,9 +1778,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_cache_type')]",
+            "name": "[concat(variables('databasePortalName'), '/query_cache_type')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1743,9 +1790,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_prealloc_size')]",
+            "name": "[concat(variables('databasePortalName'), '/query_prealloc_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8192",
@@ -1755,9 +1802,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_capture_interval')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_capture_interval')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "15",
@@ -1767,9 +1814,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_capture_mode')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_capture_mode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ALL",
@@ -1779,9 +1826,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_capture_utility_queries')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_capture_utility_queries')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "NO",
@@ -1791,9 +1838,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_retention_period_in_days')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_retention_period_in_days')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "7",
@@ -1803,9 +1850,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_wait_sampling_capture_mode')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_wait_sampling_capture_mode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ALL",
@@ -1815,9 +1862,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/query_store_wait_sampling_frequency')]",
+            "name": "[concat(variables('databasePortalName'), '/query_store_wait_sampling_frequency')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "30",
@@ -1827,9 +1874,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/range_alloc_block_size')]",
+            "name": "[concat(variables('databasePortalName'), '/range_alloc_block_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4096",
@@ -1839,9 +1886,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/range_optimizer_max_mem_size')]",
+            "name": "[concat(variables('databasePortalName'), '/range_optimizer_max_mem_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8388608",
@@ -1851,9 +1898,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/read_only')]",
+            "name": "[concat(variables('databasePortalName'), '/read_only')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1863,9 +1910,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/redirect_enabled')]",
+            "name": "[concat(variables('databasePortalName'), '/redirect_enabled')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1875,9 +1922,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/relay_log_space_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/relay_log_space_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1073741824",
@@ -1887,9 +1934,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/replicate_wild_ignore_table')]",
+            "name": "[concat(variables('databasePortalName'), '/replicate_wild_ignore_table')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "mysql.%,information_schema.%,performance_schema.%,sys.%",
@@ -1899,9 +1946,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/server_id')]",
+            "name": "[concat(variables('databasePortalName'), '/server_id')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1263155542",
@@ -1911,9 +1958,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/session_track_gtids')]",
+            "name": "[concat(variables('databasePortalName'), '/session_track_gtids')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1923,9 +1970,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/session_track_schema')]",
+            "name": "[concat(variables('databasePortalName'), '/session_track_schema')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "ON",
@@ -1935,9 +1982,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/session_track_state_change')]",
+            "name": "[concat(variables('databasePortalName'), '/session_track_state_change')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1947,9 +1994,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/show_compatibility_56')]",
+            "name": "[concat(variables('databasePortalName'), '/show_compatibility_56')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1959,9 +2006,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/skip_show_database')]",
+            "name": "[concat(variables('databasePortalName'), '/skip_show_database')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1971,9 +2018,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/slave_net_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/slave_net_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "60",
@@ -1983,9 +2030,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/slow_query_log')]",
+            "name": "[concat(variables('databasePortalName'), '/slow_query_log')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -1995,9 +2042,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/sort_buffer_size')]",
+            "name": "[concat(variables('databasePortalName'), '/sort_buffer_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "524288",
@@ -2007,9 +2054,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/sql_mode')]",
+            "name": "[concat(variables('databasePortalName'), '/sql_mode')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "source": "system-default"
@@ -2018,9 +2065,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/sql_require_primary_key')]",
+            "name": "[concat(variables('databasePortalName'), '/sql_require_primary_key')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "OFF",
@@ -2030,9 +2077,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/stored_program_cache')]",
+            "name": "[concat(variables('databasePortalName'), '/stored_program_cache')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "256",
@@ -2042,9 +2089,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/table_definition_cache')]",
+            "name": "[concat(variables('databasePortalName'), '/table_definition_cache')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "5000",
@@ -2054,9 +2101,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/table_open_cache')]",
+            "name": "[concat(variables('databasePortalName'), '/table_open_cache')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "5000",
@@ -2066,9 +2113,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/table_open_cache_instances')]",
+            "name": "[concat(variables('databasePortalName'), '/table_open_cache_instances')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -2078,9 +2125,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_cache_size')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_cache_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "14",
@@ -2090,9 +2137,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_handling')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_handling')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "one-thread-per-connection",
@@ -2102,9 +2149,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_pool_batch_max_time')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_pool_batch_max_time')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "30000",
@@ -2114,9 +2161,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_pool_batch_wait_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_pool_batch_wait_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "10000",
@@ -2126,9 +2173,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_pool_max_threads')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_pool_max_threads')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "65535",
@@ -2138,9 +2185,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_pool_min_threads')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_pool_min_threads')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "1",
@@ -2150,9 +2197,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/thread_stack')]",
+            "name": "[concat(variables('databasePortalName'), '/thread_stack')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "262144",
@@ -2162,9 +2209,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/time_zone')]",
+            "name": "[concat(variables('databasePortalName'), '/time_zone')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "SYSTEM",
@@ -2174,9 +2221,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/tmp_table_size')]",
+            "name": "[concat(variables('databasePortalName'), '/tmp_table_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "16777216",
@@ -2186,9 +2233,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/transaction_alloc_block_size')]",
+            "name": "[concat(variables('databasePortalName'), '/transaction_alloc_block_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "8192",
@@ -2198,9 +2245,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/transaction_prealloc_size')]",
+            "name": "[concat(variables('databasePortalName'), '/transaction_prealloc_size')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "4096",
@@ -2210,9 +2257,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/tx_isolation')]",
+            "name": "[concat(variables('databasePortalName'), '/tx_isolation')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "REPEATABLE-READ",
@@ -2222,9 +2269,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/updatable_views_with_limit')]",
+            "name": "[concat(variables('databasePortalName'), '/updatable_views_with_limit')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "YES",
@@ -2234,9 +2281,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/configurations",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/wait_timeout')]",
+            "name": "[concat(variables('databasePortalName'), '/wait_timeout')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "value": "180",
@@ -2246,9 +2293,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/databases",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/clevva')]",
+            "name": "[concat(variables('databasePortalName'), '/clevva')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "charset": "utf8mb4",
@@ -2258,9 +2305,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/databases",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/information_schema')]",
+            "name": "[concat(variables('databasePortalName'), '/information_schema')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "charset": "utf8",
@@ -2270,9 +2317,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/databases",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/mysql')]",
+            "name": "[concat(variables('databasePortalName'), '/mysql')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "charset": "latin1",
@@ -2282,9 +2329,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/databases",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/performance_schema')]",
+            "name": "[concat(variables('databasePortalName'), '/performance_schema')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "charset": "utf8",
@@ -2294,9 +2341,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/databases",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/sys')]",
+            "name": "[concat(variables('databasePortalName'), '/sys')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "charset": "utf8",
@@ -2306,9 +2353,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/firewallRules",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/AllowAllWindowsAzureIps')]",
+            "name": "[concat(variables('databasePortalName'), '/AllowAllWindowsAzureIps')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "startIpAddress": "0.0.0.0",
@@ -2318,9 +2365,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/firewallRules",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/ClientIPAddress_2020-10-26_10-41-6')]",
+            "name": "[concat(variables('databasePortalName'), '/ClientIPAddress_2020-10-26_10-41-6')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "startIpAddress": "197.215.171.202",
@@ -2330,9 +2377,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/firewallRules",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/ClientIPAddress_2021-3-25_12-42-22')]",
+            "name": "[concat(variables('databasePortalName'), '/ClientIPAddress_2021-3-25_12-42-22')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "startIpAddress": "102.132.246.155",
@@ -2342,9 +2389,9 @@
         {
             "type": "Microsoft.DBforMySQL/servers/securityAlertPolicies",
             "apiVersion": "2017-12-01",
-            "name": "[concat(parameters('servers_blueprism_database_name'), '/Default')]",
+            "name": "[concat(variables('databasePortalName'), '/Default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_blueprism_database_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "state": "Enabled",
@@ -2362,9 +2409,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccounts_clevvacontent_name'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_clevvacontent_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "sku": {
                 "name": "Standard_RAGRS",
@@ -2382,9 +2429,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccounts_clevvacontent_name'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_clevvacontent_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "sku": {
                 "name": "Standard_RAGRS",
@@ -2406,9 +2453,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/queueServices",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccounts_clevvacontent_name'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_clevvacontent_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "properties": {
                 "cors": {
@@ -2419,9 +2466,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/tableServices",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccounts_clevvacontent_name'), '/default')]",
+            "name": "[concat(parameters('storageAccount'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_clevvacontent_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "properties": {
                 "cors": {
@@ -2432,10 +2479,10 @@
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2018-11-01",
-            "name": "[parameters('sites_BluePrism_name')]",
-            "location": "UK South",
+            "name": "[parameters('webAppName')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_BluePrism_bad4_name'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
             ],
             "kind": "app,linux",
             "identity": {
@@ -2457,7 +2504,7 @@
                         "hostType": "Repository"
                     }
                 ],
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_BluePrism_bad4_name'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
                 "reserved": true,
                 "isXenon": false,
                 "hyperV": false,
@@ -2475,10 +2522,10 @@
         {
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/web')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/web')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "numberOfWorkers": 1,
@@ -2556,10 +2603,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/072e76773deda813c7fbc42fc08122892a8791f0')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/072e76773deda813c7fbc42fc08122892a8791f0')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2575,10 +2622,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/167296c1ac6e943ed8d3038483d96c9814fb2a1e')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/167296c1ac6e943ed8d3038483d96c9814fb2a1e')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2594,10 +2641,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/1dd25dc938d2729ef21c2ebd626643fdc7ffe9e1')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/1dd25dc938d2729ef21c2ebd626643fdc7ffe9e1')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2613,10 +2660,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/8f9a0a735b39d738fc04c325aeef876afa9be743')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/8f9a0a735b39d738fc04c325aeef876afa9be743')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2632,10 +2679,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/9ca75a739321f7b53ed66e8cec1a216e06a9219f')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/9ca75a739321f7b53ed66e8cec1a216e06a9219f')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2651,10 +2698,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/be0fafef0c7a6f99ea52984f79c77c8997554615')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/be0fafef0c7a6f99ea52984f79c77c8997554615')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2670,10 +2717,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/bff528f326c2042447b8b8b4605e39e70d8efde0')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/bff528f326c2042447b8b8b4605e39e70d8efde0')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 3,
@@ -2689,10 +2736,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/ca4fc0e75d4feae6c38f007435f35f90c64d58e9')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/ca4fc0e75d4feae6c38f007435f35f90c64d58e9')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2708,10 +2755,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/dda706fb30b9ab0aac71f6e3de3e64a4ec20ca63')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/dda706fb30b9ab0aac71f6e3de3e64a4ec20ca63')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2727,10 +2774,10 @@
         {
             "type": "Microsoft.Web/sites/deployments",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/e8c0a12cc7ebfd85340b9a6987c16f20db7f6c8e')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/e8c0a12cc7ebfd85340b9a6987c16f20db7f6c8e')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "status": 4,
@@ -2746,10 +2793,10 @@
         {
             "type": "Microsoft.Web/sites/hostNameBindings",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('sites_BluePrism_name'), '/', parameters('sites_BluePrism_name'), '.azurewebsites.net')]",
-            "location": "UK South",
+            "name": "[concat(parameters('webAppName'), '/', parameters('webAppName'), '.azurewebsites.net')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('sites_BluePrism_name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
             ],
             "properties": {
                 "siteName": "BluePrism",
@@ -2759,10 +2806,10 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints",
             "apiVersion": "2020-09-01",
-            "name": "[concat(parameters('profiles_Clevva_name'), '/blueprism')]",
+            "name": "[concat(variables('cdnName'), '/blueprism')]",
             "location": "Global",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles', parameters('profiles_Clevva_name'))]"
+                "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
                 "originHostHeader": "blueprism.azurewebsites.net",
@@ -2832,7 +2879,7 @@
                         "properties": {
                             "origins": [
                                 {
-                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', parameters('profiles_Clevva_name'), 'blueprism', 'blueprism-azurewebsites-net')]"
+                                    "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'blueprism', 'blueprism-azurewebsites-net')]"
                                 }
                             ]
                         }
@@ -2845,10 +2892,10 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/origins",
             "apiVersion": "2020-09-01",
-            "name": "[concat(parameters('profiles_Clevva_name'), '/blueprism/blueprism-azurewebsites-net')]",
+            "name": "[concat(variables('cdnName'), '/blueprism/blueprism-azurewebsites-net')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', parameters('profiles_Clevva_name'), 'blueprism')]",
-                "[resourceId('Microsoft.Cdn/profiles', parameters('profiles_Clevva_name'))]"
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'blueprism')]",
+                "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]"
             ],
             "properties": {
                 "hostName": "blueprism.azurewebsites.net",
@@ -2861,10 +2908,10 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccounts_clevvacontent_name'), '/default/', parameters('storageAccounts_clevvacontent_name'))]",
+            "name": "[concat(parameters('storageAccount'), '/default/', parameters('storageAccount'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_clevvacontent_name'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_clevvacontent_name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccount'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
             ],
             "properties": {
                 "accessTier": "TransactionOptimized",
@@ -2875,16 +2922,16 @@
         {
             "type": "Microsoft.Cdn/profiles/endpoints/origingroups",
             "apiVersion": "2020-09-01",
-            "name": "[concat(parameters('profiles_Clevva_name'), '/blueprism/blueprism')]",
+            "name": "[concat(variables('cdnName'), '/blueprism/blueprism')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles/endpoints', parameters('profiles_Clevva_name'), 'blueprism')]",
-                "[resourceId('Microsoft.Cdn/profiles', parameters('profiles_Clevva_name'))]",
-                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', parameters('profiles_Clevva_name'), 'blueprism', 'blueprism-azurewebsites-net')]"
+                "[resourceId('Microsoft.Cdn/profiles', variables('cdnName'))]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints', variables('cdnName'), 'blueprism')]",
+                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'blueprism', 'blueprism-azurewebsites-net')]"
             ],
             "properties": {
                 "origins": [
                     {
-                        "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', parameters('profiles_Clevva_name'), 'blueprism', 'blueprism-azurewebsites-net')]"
+                        "id": "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', variables('cdnName'), 'blueprism', 'blueprism-azurewebsites-net')]"
                     }
                 ]
             }
