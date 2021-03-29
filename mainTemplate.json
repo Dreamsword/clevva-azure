@@ -157,7 +157,8 @@
             "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "P1v3"
+                "Tier": "Standard",
+                "Name": "S1"
             },
             "kind": "linux",
             "properties": {
@@ -277,7 +278,7 @@
                         "mountPath": "/clevva"
                     }
                 },
-                "scmType": "BitbucketGit",
+                "scmType": "VSTSRM",
                 "use32BitWorkerProcess": true,
                 "webSocketsEnabled": false,
                 "alwaysOn": true,
