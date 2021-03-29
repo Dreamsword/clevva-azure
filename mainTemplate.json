@@ -2762,8 +2762,7 @@
             "name": "[concat(parameters('profiles_Clevva_name'), '/blueprism')]",
             "location": "Global",
             "dependsOn": [
-                "[resourceId('Microsoft.Cdn/profiles', parameters('profiles_Clevva_name'))]",
-                "[resourceId('Microsoft.Cdn/profiles/endpoints/origins', parameters('profiles_Clevva_name'), 'blueprism', 'blueprism-azurewebsites-net')]"
+                "[resourceId('Microsoft.Cdn/profiles', parameters('profiles_Clevva_name'))]"
             ],
             "properties": {
                 "originHostHeader": "blueprism.azurewebsites.net",
