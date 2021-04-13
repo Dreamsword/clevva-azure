@@ -55,7 +55,6 @@
         }
     },
     "variables": {
-        "accessKeyStorage": "[listKeys('Microsoft.Storage/storageAccounts', '2021-01-01').primaryConnectionString]",
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
         "branch": "master",
         "cdnName": "ClevvaCDN",
@@ -271,7 +270,7 @@
                         "accountName": "[parameters('storageAccount')]",
                         "shareName": "clevvacontent",
                         "mountPath": "/clevva",
-                        "accessKey": "[variables('accessKeyStorage')]"
+                        "accessKey": "[listKeys('Microsoft.Storage/storageAccounts', '2021-01-01').primaryConnectionString]"
                     }
                 },
                 "scmType": "BitbucketGit",
