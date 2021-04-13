@@ -55,6 +55,7 @@
         }
     },
     "variables": {
+        "accessKeyStorage": "[listKeys('Microsoft.Storage/storageAccounts', '2021-01-01').primaryConnectionString]",
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
         "branch": "master",
         "cdnName": "ClevvaCDN",
@@ -246,7 +247,7 @@
         {
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2018-11-01",
-            "name": "[concat(parameters('webAppName'), '/web')]",
+            "name": "[concat(parameters('webAppName'), '/webconfig')]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
@@ -269,10 +270,11 @@
                         "type": "AzureFiles",
                         "accountName": "[parameters('storageAccount')]",
                         "shareName": "clevvacontent",
-                        "mountPath": "/clevva"
+                        "mountPath": "/clevva",
+                        "accessKey": "[variables('accessKeyStorage')]"
                     }
                 },
-                "scmType": "VSTSRM",
+                "scmType": "BitbucketGit",
                 "use32BitWorkerProcess": true,
                 "webSocketsEnabled": false,
                 "alwaysOn": true,
