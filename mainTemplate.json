@@ -270,7 +270,7 @@
                         "accountName": "[parameters('storageAccount')]",
                         "shareName": "clevvacontent",
                         "mountPath": "/clevva",
-                        "accessKey": "[listKeys('Microsoft.Storage/storageAccounts', '2021-01-01').primaryConnectionString]"
+                        "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount')), '2021-01-01').primaryKey]"
                     }
                 },
                 "scmType": "BitbucketGit",
