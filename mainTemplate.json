@@ -39,16 +39,10 @@
                 "description": "Name of the storage account you would like to create"
             }
         },
-        "userPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the user"
-            }
-        },
-        "userName": {
+        "emailAddress": {
             "type": "string",
             "metadata": {
-                "description": "Enter an email address to be used to login to the App"
+                "description": "Enter an email address to receive a one time login link"
             }
         },
         "webAppName": {
@@ -66,7 +60,7 @@
         "cdnName": "ClevvaCDN",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "databaseUsername": "clevvapro",
-        "databasePassword": "[concat('C', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'a', '!')]",
+        "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
         "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git"
     },
@@ -200,12 +194,12 @@
                             "value": "clevva"
                         },
                         {
-                            "name": "USER_NAME",
-                            "value": "[parameters('userName')]"
+                            "name": "USER_EMAIL",
+                            "value": "[parameters('emailAddress')]"
                         },
                         {
-                            "name": "USER_PASS",
-                            "value": "[parameters('userPassword')]"
+                            "name": "APP_LOCATION",
+                            "value": "[parameters('location')]"
                         },
                         {
                             "name": "IS_HTTPS",

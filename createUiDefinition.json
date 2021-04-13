@@ -21,33 +21,24 @@
                 "bladeTitle": "WebApp Settings",
                 "elements": [
 					{
-						"name": "userName",
+						"name": "emaildInfoBox",
+						"type": "Microsoft.Common.InfoBox",
+						"visible": true,
+						"options": {
+							"icon": "Warning",
+							"text": "Please ensure your email address is correct as this can not be changed later"
+						}
+					},
+					{
+						"name": "emailAddress",
 						"type":"Microsoft.Common.TextBox",
-						"label": "Username",
-						"toolTip": "Enter an email address to be used to login to the App",
+						"label": "Email Address",
+						"toolTip": "Enter an email address to receive a one time login link",
 						"constraints": {
 							"required": true,
 							"regex": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
 							"validationMessage": "A valid email address is required"
 						},
-            		    "visible": true
-					},
-					{
-            		    "name": "userPassword",
-            		    "type": "Microsoft.Common.PasswordBox",
-            		    "label": {
-            		        "password": "Password",
-            		        "confirmPassword": "Confirm password"
-            		    },
-            		    "toolTip": "Password for the user.",
-            		    "constraints": {
-            		        "required": true,
-                            "regex": "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[\\w~@#$%^&*+=|{}:;!.?\\()\\[\\]-]{12,}$",
-                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase, 1 lowercase and 1 number"
-            		    },
-            		    "options": {
-            		        "hideConfirmation": false
-            		    },
             		    "visible": true
 					},
 					{
@@ -170,8 +161,7 @@
             "location": "[location()]",
             "manualUpdate": "[steps('webAppConfig').manualUpdate]",
 			"storageAccount": "[steps('webAppConfig').storageAccount]",
-			"userPassword": "[steps('webAppConfig').userPassword]",
-			"userName": "[steps('webAppConfig').userName]",
+			"emailAddress": "[steps('webAppConfig').emailAddress]",
 			"webAppName": "[steps('webAppConfig').webAppName.name]"
         }
     }
