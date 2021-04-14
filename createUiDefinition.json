@@ -55,7 +55,7 @@
             		    "visible": true
             		},
 					{
-            		    "name": "storageAccount",
+            		    "name": "storageAccountName",
             		    "type": "Microsoft.Common.TextBox",
             		    "label": "Storage Account Name",
             		    "defaultValue": "clevvacontent",
@@ -160,7 +160,7 @@
 			"databaseResources": "[steps('dbConfig').databaseResources]",
             "location": "[location()]",
             "manualUpdate": "[steps('webAppConfig').manualUpdate]",
-			"storageAccount": "[steps('webAppConfig').storageAccount]",
+			"storageAccountName": "[steps('webAppConfig').storageAccountName]",
 			"emailAddress": "[steps('webAppConfig').emailAddress]",
 			"webAppName": "[steps('webAppConfig').webAppName.name]"
         }

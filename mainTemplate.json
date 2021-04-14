@@ -32,7 +32,7 @@
                 "description": "Set to false if you would like the Clevva software to update automatically"
             }
         },
-        "storageAccount": {
+        "storageAccountName": {
             "type": "string",
             "defaultValue": "clevvacontent",
             "metadata": {
@@ -62,7 +62,9 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "storageAccountApiVersion": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]"
     },
     "resources": [
         {
@@ -81,7 +83,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2021-01-01",
-            "name": "[parameters('storageAccount')]",
+            "name": "[parameters('storageAccountName')]",
             "location": "[parameters('location')]",
             "sku": {
                 "name": "Standard_RAGRS",
@@ -116,9 +118,9 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccount'), '/default')]",
+            "name": "[concat(parameters('storageAccountName'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
             ],
             "sku": {
                 "name": "Standard_RAGRS",
@@ -134,10 +136,10 @@
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2021-01-01",
-            "name": "[concat(parameters('storageAccount'), '/default/', parameters('storageAccount'))]",
+            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('storageAccountName'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccount'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
             ],
             "properties": {
                 "accessTier": "TransactionOptimized",
@@ -167,7 +169,7 @@
             "kind": "app,linux",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
             ],
             "properties": {
                 "enabled": true,
@@ -267,10 +269,10 @@
                 "azureStorageAccounts": {
                     "clevvacontent": {
                         "type": "AzureFiles",
-                        "accountName": "[parameters('storageAccount')]",
+                        "accountName": "[parameters('storageAccountName')]",
                         "shareName": "clevvacontent",
                         "mountPath": "/clevva",
-                        "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount')), '2021-01-01').keys]"
+                        "accessKey": "[listKeys(variables('storageAccountId'), variables('storageAccountApiVersion')).keys[0].value]"
                     }
                 },
                 "scmType": "BitbucketGit",
@@ -331,6 +333,9 @@
             "apiVersion": "2017-12-01",
             "name": "[variables('databasePortalName')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+            ],
             "sku": {
                 "name": "[parameters('DatabaseResources')]",
                 "tier": "GeneralPurpose",
