@@ -275,7 +275,7 @@
                         "accessKey": "[listKeys(variables('storageAccountId'), variables('storageAccountApiVersion')).keys[0].value]"
                     }
                 },
-                "scmType": "VSTSRM",
+                "scmType": "BitbucketGit",
                 "use32BitWorkerProcess": true,
                 "webSocketsEnabled": false,
                 "alwaysOn": true,
