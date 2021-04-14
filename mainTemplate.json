@@ -169,7 +169,8 @@
             "kind": "app,linux",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
             ],
             "properties": {
                 "enabled": true,
@@ -333,9 +334,6 @@
             "apiVersion": "2017-12-01",
             "name": "[variables('databasePortalName')]",
             "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-            ],
             "sku": {
                 "name": "[parameters('DatabaseResources')]",
                 "tier": "GeneralPurpose",
