@@ -62,7 +62,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://$CLEVVA_COMPILED_USER@bitbucket.org/clevva/clevva-compiled.git",
+        "repoURL": "https://$CLEVVA_COMPILED_USER:$CLEVVA_COMPILED_PASS@bitbucket.org/clevva/clevva-compiled.git",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
         "storageAccountApiVersion": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]"
     },
