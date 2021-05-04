@@ -21,7 +21,7 @@
                 "bladeTitle": "WebApp Settings",
                 "elements": [
 					{
-						"name": "emailInfoBox",
+						"name": "emaildInfoBox",
 						"type": "Microsoft.Common.InfoBox",
 						"visible": true,
 						"options": {
@@ -47,6 +47,19 @@
             		    "label": "Web App Name",
             		    "defaultValue": "Clevva-Web-App",
             		    "toolTip": "Base name of the resource such as Clevva-Web-App",
+            		    "constraints": {
+            		        "required": true,
+                            "regex": "^[a-z0-9A-Z-]{3,79}$",
+                            "validationMessage": "The name must be between 3 and 79 characters long and contain letters, numbers and hyphens only"
+            		    },
+            		    "visible": true
+            		},
+					{
+            		    "name": "storageAccountName",
+            		    "type": "Microsoft.Common.TextBox",
+            		    "label": "Storage Account Name",
+            		    "defaultValue": "clevvacontent",
+            		    "toolTip": "Name of the storage account you would like to create",
             		    "constraints": {
             		        "required": true,
                             "regex": "^[a-z0-9A-Z-]{3,79}$",
@@ -147,6 +160,7 @@
 			"databaseResources": "[steps('dbConfig').databaseResources]",
             "location": "[location()]",
             "manualUpdate": "[steps('webAppConfig').manualUpdate]",
+			"storageAccountName": "[steps('webAppConfig').storageAccountName]",
 			"emailAddress": "[steps('webAppConfig').emailAddress]",
 			"webAppName": "[steps('webAppConfig').webAppName.name]"
         }
