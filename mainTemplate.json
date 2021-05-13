@@ -155,6 +155,9 @@
                     "type": "Microsoft.Web/sourcecontrols",
                     "apiVersion": "2020-12-01",
                     "name": "Bitbucket Auth",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+                    ],
                     "properties": {
                       "token": "5cSMEre72uzxDzkRuH",
                       "tokenSecret": "5VdQdmGq2SfxGrUhsLX5YtFX2szCLt8g"
