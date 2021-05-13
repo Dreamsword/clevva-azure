@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://$CLEVVA_COMPILED_USER:$CLEVVA_COMPILED_PASS@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://ClevvaDevOps:992trSDHJsSqNzFGv4Jp@bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [
         {
@@ -158,7 +158,6 @@
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
-                        "[resourceId('Microsoft.Web/sourcecontrols', 'Bitbucket Auth')]",
                         "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
                     ],
                     "properties": {
@@ -169,18 +168,6 @@
                     }
                 }
             ]
-        },
-        {
-            "type": "Microsoft.Web/sourcecontrols",
-            "apiVersion": "2020-12-01",
-            "name": "Bitbucket Auth",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-            ],
-            "properties": {
-              "token": "5cSMEre72uzxDzkRuH",
-              "tokenSecret": "5VdQdmGq2SfxGrUhsLX5YtFX2szCLt8g"
-            }
         },
         {
             "type": "Microsoft.Web/sites/config",
