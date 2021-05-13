@@ -152,7 +152,7 @@
             },
             "resources": [
                 {
-                    "type": "Microsoft.Web/sites/sourcecontrols",
+                    "type": "sourcecontrols",
                     "apiVersion": "2020-12-01",
                     "name": "web",
                     "location": "[parameters('location')]",
