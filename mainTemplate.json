@@ -152,24 +152,13 @@
             },
             "resources": [
                 {
-                    "type": "Microsoft.Web/sourcecontrols",
+                    "type": "Microsoft.Web/sites/sourcecontrols",
                     "apiVersion": "2020-12-01",
-                    "name": "Bitbucket Auth",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-                    ],
-                    "properties": {
-                      "token": "5cSMEre72uzxDzkRuH",
-                      "tokenSecret": "5VdQdmGq2SfxGrUhsLX5YtFX2szCLt8g"
-                    }
-                },
-                {
-                    "type": "sourcecontrols",
-                    "apiVersion": "2020-09-01",
                     "name": "web",
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+                        "[resourceId('Microsoft.Web/sourcecontrols', 'Bitbucket Auth')]",
                         "[resourceId('Microsoft.DBforMySQL/servers', variables('databasePortalName'))]"
                     ],
                     "properties": {
@@ -180,6 +169,18 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "Microsoft.Web/sourcecontrols",
+            "apiVersion": "2020-12-01",
+            "name": "Bitbucket Auth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+            ],
+            "properties": {
+              "token": "5cSMEre72uzxDzkRuH",
+              "tokenSecret": "5VdQdmGq2SfxGrUhsLX5YtFX2szCLt8g"
+            }
         },
         {
             "type": "Microsoft.Web/sites/config",
