@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://ClevvaDevOps:YT_xk39b!@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://$CLEVVA_COMPILED_USER:$CLEVVA_COMPILED_PASS@bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [
         {
@@ -151,6 +151,15 @@
                 }
             },
             "resources": [
+                {
+                    "type": "Microsoft.Web/sourcecontrols",
+                    "apiVersion": "2020-12-01",
+                    "name": "Bitbucket Auth",
+                    "properties": {
+                      "token": "5cSMEre72uzxDzkRuH",
+                      "tokenSecret": "5VdQdmGq2SfxGrUhsLX5YtFX2szCLt8g"
+                    }
+                },
                 {
                     "type": "sourcecontrols",
                     "apiVersion": "2020-09-01",
