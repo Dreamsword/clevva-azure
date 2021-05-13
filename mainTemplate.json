@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://Clevva_DevOps:992trSDHJsSqNzFGv4Jp@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://ClevvaDevOps:992trSDHJsSqNzFGv4Jp@bitbucket.org/clevva/clevva-compiled.git"
     },
     "resources": [
         {
