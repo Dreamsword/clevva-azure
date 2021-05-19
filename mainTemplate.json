@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://github.com/Dreamsword/clevva.git"
+        "repoURL": "https://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@github.com/Dreamsword/clevva.git"
     },
     "resources": [
         {
@@ -86,12 +86,14 @@
             }
         },
         {
-            "name": "GitHub Token",
+            "name": "github",
             "type": "Microsoft.Web/sourcecontrols",
-            "apiVersion": "2020-09-01",
+            "apiVersion": "2020-12-01",
             "properties": {
-              "token": "41c5bc7d9e3c98b56511",
-              "tokenSecret": "b22dd7d60c17455afc3ba93ef5a25dc387320a21"
+              "token": "string",
+              "tokenSecret": "string",
+              "refreshToken": "string",
+              "expirationTime": "string"
             }
         },
         {
@@ -157,24 +159,7 @@
                         }
                     ]
                 }
-            },
-            "resources": [
-                {  
-                    "type": "sourcecontrols",
-                    "apiVersion": "2020-12-01",
-                    "name": "web",
-                    "location": "[parameters('location')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-                    ],
-                    "properties": {
-                        "repoUrl": "[variables('repoURL')]",
-                        "branch": "[variables('branch')]",
-                        "deploymentRollbackEnabled": true,
-                        "isManualIntegration": "[parameters('manualUpdate')]"
-                    }
-                }
-            ]
+            }
         },
         {
             "type": "Microsoft.Web/sites/config",
