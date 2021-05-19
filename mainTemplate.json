@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://ClevvaDevOps:992trSDHJsSqNzFGv4Jp@bitbucket.org/clevva/clevva-compiled.git"
+        "repoURL": "https://github.com/Dreamsword/clevva.git"
     },
     "resources": [
         {
@@ -83,6 +83,15 @@
             "kind": "linux",
             "properties": {
                 "reserved": true
+            }
+        },
+        {
+            "name": "GitHub Token",
+            "type": "Microsoft.Web/sourcecontrols",
+            "apiVersion": "2020-09-01",
+            "properties": {
+              "token": "41c5bc7d9e3c98b56511",
+              "tokenSecret": "b22dd7d60c17455afc3ba93ef5a25dc387320a21"
             }
         },
         {
@@ -188,7 +197,7 @@
                 "logsDirectorySizeLimit": 35,
                 "detailedErrorLoggingEnabled": false,
                 "publishingUsername": "[parameters('webAppName')]",
-                "scmType": "VSTSRM",
+                "scmType": "GitHub",
                 "use32BitWorkerProcess": true,
                 "webSocketsEnabled": false,
                 "alwaysOn": true,
