@@ -150,19 +150,13 @@
                 }
             },
             "resources": [
-                {
-                    "type": "sourcecontrols",
-                    "apiVersion": "2020-12-01",
+                {  
                     "name": "web",
-                    "location": "[parameters('location')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-                    ],
+                    "type": "Microsoft.Web/sourcecontrols",
+                    "apiVersion": "2020-12-01",
                     "properties": {
-                        "repoUrl": "[variables('repoURL')]",
-                        "branch": "[variables('branch')]",
-                        "deploymentRollbackEnabled": true,
-                        "isManualIntegration": "[parameters('manualUpdate')]"
+                      "token": "Microsoft Azure App Service",
+                      "tokenSecret": "992trSDHJsSqNzFGv4Jp"
                     }
                 }
             ]
