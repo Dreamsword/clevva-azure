@@ -246,6 +246,10 @@
         "location": {
             "type": "string",
             "value": "[parameters('location')]"
+        },
+        "theUrlToCloneFrom": { 
+            "type": "string", 
+            "value": "[variables('repoURL')]"
         }
     }
 }
