@@ -55,7 +55,7 @@
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://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@github.com/Dreamsword/clevva.git"
+        "repoURL": "https://Dreamsword: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@github.com/Dreamsword/clevva.git"
     },
     "resources": [
         {
