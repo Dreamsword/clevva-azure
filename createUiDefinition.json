@@ -55,26 +55,6 @@
             		    "visible": true
             		},
 					{
-                		"name": "manualUpdate",
-                		"type": "Microsoft.Common.DropDown",
-                		"label": "Manual Update",
-                		"toolTip": "Set to false if you would like the Clevva software to update automatically",
-                		"constraints": {
-                		    "required": true,
-                		    "allowedValues": [
-                		        {
-                		            "label": "true",
-                		            "value": true
-                		        },
-                		        {
-                		            "label": "false",
-                		            "value": false
-                		        }
-                		    ]
-                		},
-                		"visible": true
-            		},
-					{
                 		"name": "enableCDN",
                 		"type": "Microsoft.Common.DropDown",
                 		"label": "Enable CDN",
@@ -111,14 +91,14 @@
 						"visible": true,
 						"options": {
 							"icon": "Info",
-							"text": "Entry Level: 4vCPU, 100GB Storage\n\nMid Level: 16vCPU, 100GB Storage\n\nEnterprise: 64vCPU, 100GB Storage"
+							"text": "Entry Level: 4vCPU, 100GB Storage\n\nMid Level: 8vCPU, 100GB Storage\n\nEnterprise: 16vCPU, 100GB Storage"
 						}
 					},
             		{
             		    "name": "databaseResources",
             		    "type": "Microsoft.Common.DropDown",
             		    "label": "Database Resources",
-            		    "toolTip": "Entry Level: 4vCPU Mid Level: 16vCPU Enterprise: 64vCPU",
+            		    "toolTip": "Entry Level: 4vCPU Mid Level: 8vCPU Enterprise: 16vCPU",
 						"defaultValue": "Entry Level Speed",
             		    "constraints": {
             		        "required": true,
@@ -129,11 +109,11 @@
             		            },
             		            {
             		                "label": "Mid Level Speed",
-            		                "value": "GP_Gen5_16"
+            		                "value": "GP_Gen5_8"
             		            },
             		            {
             		                "label": "Enterprise Level Speed",
-            		                "value": "GP_Gen5_64"
+            		                "value": "GP_Gen5_16"
             		            }
             		        ]
             		    },
@@ -146,7 +126,6 @@
 			"cdn": "[steps('webAppConfig').enableCDN]",
 			"databaseResources": "[steps('dbConfig').databaseResources]",
             "location": "[location()]",
-            "manualUpdate": "[steps('webAppConfig').manualUpdate]",
 			"emailAddress": "[steps('webAppConfig').emailAddress]",
 			"webAppName": "[steps('webAppConfig').webAppName.name]"
         }
