@@ -45,7 +45,6 @@
             		    "name": "webAppName",
             		    "type": "Microsoft.Common.TextBox",
             		    "label": "Web App Name",
-            		    "defaultValue": "Clevva-Web-App",
             		    "toolTip": "Base name of the resource such as Clevva-Web-App",
             		    "constraints": {
             		        "required": true,

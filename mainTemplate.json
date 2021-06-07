@@ -34,9 +34,8 @@
         },
         "webAppName": {
             "type": "string",
-            "defaultValue": "Clevva-Web-App",
             "metadata": {
-                "description": "Base name of the resource such as Clevva-Web-App."
+                "description": "Base name of the resource such."
             },
             "minLength": 3
         }
