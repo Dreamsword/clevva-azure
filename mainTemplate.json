@@ -123,6 +123,10 @@
                             "name": "SUBSCRIPTION_ID",
                             "value": "[variables('subscriptionID')]"
                         },
+                                                {
+                            "name": "WEBSITE_INSTALLED",
+                            "value": "false"
+                        },
                         {
                             "name": "IS_HTTPS",
                             "value": "true"
