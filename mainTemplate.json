@@ -42,13 +42,12 @@
     },
     "variables": {
         "appServicePlanName": "[concat('AppServicePlan-', parameters('webAppName'))]",
-        "branch": "master",
         "cdnName": "ClevvaCDN",
         "databasePortalName": "[concat(parameters('webAppName'), '-database')]",
         "databaseUsername": "clevvapro",
         "databasePassword": "[concat('db', uniqueString(resourceGroup().id, '224F5A8B-51DB-46A3-A7C8-59B0DD584A41'), 'Pass', '!')]",
         "linuxFxVersion": "php|7.4",
-        "repoURL": "https://github.com/Dreamsword/clevva.git"
+        "subscriptionID": "[subscription().subscriptionId]"
     },
     "resources": [
         {
@@ -119,6 +118,10 @@
                         {
                             "name": "APP_LOCATION",
                             "value": "[parameters('location')]"
+                        },
+                        {
+                            "name": "SUBSCRIPTION_ID",
+                            "value": "[variables('subscriptionID')]"
                         },
                         {
                             "name": "IS_HTTPS",
