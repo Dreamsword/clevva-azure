@@ -68,8 +68,8 @@
             "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "tier": "Premium V2",
-                "name": "P2V2"
+                "tier": "Premium V3",
+                "name": "P1V3"
             },
             "kind": "linux",
             "properties": {
