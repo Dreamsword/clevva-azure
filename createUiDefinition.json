@@ -13,12 +13,12 @@
         "steps": [
 			{
 				"name": "webAppConfig",
-                "label": "WebApp Settings",
+                "label": "Web App Setup",
                 "subLabel": {
-                    "preValidation": "Configure the WebApp's resources and settings",
+                    "preValidation": "Configure the Web App's resources and settings",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "WebApp Settings",
+                "bladeTitle": "Web App Setup",
                 "elements": [
 					{
 						"name": "emailInfoBox",
@@ -26,14 +26,14 @@
 						"visible": true,
 						"options": {
 							"icon": "Warning",
-							"text": "Please ensure your email address is correct as this can not be changed later"
+							"text": "Ensure that the email address is correct, as this can't be changed at a later point."
 						}
 					},
 					{
 						"name": "emailAddress",
 						"type":"Microsoft.Common.TextBox",
 						"label": "Email Address",
-						"toolTip": "Enter an email address to receive a one time login link",
+						"toolTip": "A one-time login link will be sent to this email address.",
 						"constraints": {
 							"required": true,
 							"regex": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
@@ -45,7 +45,7 @@
             		    "name": "webAppName",
             		    "type": "Microsoft.Common.TextBox",
             		    "label": "Web App Name",
-            		    "toolTip": "Base name of the resource such as Clevva-Web-App",
+            		    "toolTip": "The name of the resource, e.g. 'Example-Web-App'.",
             		    "constraints": {
             		        "required": true,
                             "regex": "^[a-z0-9A-Z-]{3,79}$",
@@ -56,17 +56,17 @@
 					{
                 		"name": "enableCDN",
                 		"type": "Microsoft.Common.DropDown",
-                		"label": "Enable CDN",
-                		"toolTip": "Azure Content Delivery Network (CDN) lets you reduce load times, save bandwidth, and speed responsiveness",
+                		"label": "Azure CDN",
+                		"toolTip": "The Azure CDN helps reduce load times and increase responsiveness.",
                 		"constraints": {
                 		    "required": true,
                 		    "allowedValues": [
                 		        {
-                		            "label": "true",
+                		            "label": "Enable Azure CDN",
                 		            "value": true
                 		        },
                 		        {
-                		            "label": "false",
+                		            "label": "Off (default)",
                 		            "value": false
                 		        }
                 		    ]
@@ -77,12 +77,12 @@
 			},
 			{
 				"name": "dbConfig",
-                "label": "Database Settings",
+                "label": "Database Setup",
                 "subLabel": {
-                    "preValidation": "Configure the Database's resources and settings",
+                    "preValidation": "Configure the Database's resources",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Database Settings",
+                "bladeTitle": "Database Setup",
                 "elements": [
 					{
 						"name": "databaseInfoBox",
@@ -90,28 +90,28 @@
 						"visible": true,
 						"options": {
 							"icon": "Info",
-							"text": "Entry Level: 4vCPU, 100GB Storage\n\nMid Level: 8vCPU, 100GB Storage\n\nEnterprise: 16vCPU, 100GB Storage"
+							"text": "- Basic: 4 x vCPU + 100Gb storage\n\n- Standard: 8 x vCPU + 100Gb storage\n\n- Enterprise: 16 x vCPU + 100Gb storage"
 						}
 					},
             		{
             		    "name": "databaseResources",
             		    "type": "Microsoft.Common.DropDown",
-            		    "label": "Database Resources",
-            		    "toolTip": "Entry Level: 4vCPU Mid Level: 8vCPU Enterprise: 16vCPU",
-						"defaultValue": "Entry Level Speed",
+            		    "label": "Database Speed",
+            		    "toolTip": "Select the database speed that best suits your needs.",
+						"defaultValue": "Basic: 4 x vCPUs + 100Gb storage",
             		    "constraints": {
             		        "required": true,
             		        "allowedValues": [
             		            {
-            		                "label": "Entry Level Speed",
+            		                "label": "Basic: 4 x vCPUs + 100Gb storage",
             		                "value": "GP_Gen5_4"
             		            },
             		            {
-            		                "label": "Mid Level Speed",
+            		                "label": "Standard: 8 x vCPUs + 100Gb storage",
             		                "value": "GP_Gen5_8"
             		            },
             		            {
-            		                "label": "Enterprise Level Speed",
+            		                "label": "Enterprise: 16 x vCPUs + 100Gb storage",
             		                "value": "GP_Gen5_16"
             		            }
             		        ]
